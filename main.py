@@ -3,9 +3,15 @@ import GPTDataset
 from GPTDataset import GPTDataset
 from torch.utils.data import DataLoader
 
-# Create a GPT dataset from text input
-def createDataLoader(text, batchSize=4, maxLength=256, stride=128, shuffle=True,
-                     dropLast=True, numWorkers=0):
+# Create a tokenized GPT dataset from text input
+#
+# BatchSize: Number of tokens per batch
+# MaxLength: Context size
+# Stride: Number of positions the input shifts across batches
+# Shuffle: Shufles dataset - usually always false
+# DropLast: Drops final batch if shorter than batch size
+def createDataLoader(text, batchSize=4, maxLength=256, stride=128,
+                     shuffle=True, dropLast=True, numWorkers=0):
     tokenizer = tiktoken.get_encoding("gpt2")
     dataset = GPTDataset(text, tokenizer, maxLength, stride)
     dataloader = DataLoader(
@@ -23,10 +29,16 @@ def createDataLoader(text, batchSize=4, maxLength=256, stride=128, shuffle=True,
 with open("the-verdict.txt", mode="r", encoding="utf-8") as f:
     rawText = f.read()
 
-dataloader = createDataLoader(rawText,1,4,1,False)
+dataloader = createDataLoader(
+    rawText,
+    batchSize=8,
+    maxLength=4,
+    stride=4,
+    shuffle=False
+)
 
 # Convert dataloader to py iterator to fetch the next entry
 dataItr = iter(dataloader)
-firstBatch = next(dataItr)
-
-print(firstBatch)
+inputs, targets = next(dataItr)
+print("Inputs:\n", inputs)
+print("\nTargets:\n", targets)
