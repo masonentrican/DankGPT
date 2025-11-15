@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dankgpt"
+version = "0.0.1"
+description = "Home grown dank gpt like llm"
+requires-python = ">=3.11"
+dependencies = [
+  "torch",
+  "tiktoken",
+  "numpy"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

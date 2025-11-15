@@ -1,0 +1,76 @@
+# -----------------------------
+# Python & venv
+# -----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+.venv/
+env/
+venv/
+
+# Virtualenv metadata
+*.python-version
+
+# -----------------------------
+# Build artifacts
+# -----------------------------
+*.egg-info/
+dist/
+build/
+
+# editable install metadata cache
+pip-wheel-metadata/
+*.whl
+
+# -----------------------------
+# PyTorch / CUDA extremely large
+# -----------------------------
+# (Don’t commit model weights unless intentional)
+*.pt
+*.pth
+*.bin
+*.ckpt
+
+# -----------------------------
+# Training logs
+# -----------------------------
+logs/
+wandb/
+tensorboard/
+*.log
+
+# -----------------------------
+# Data folders
+# -----------------------------
+data/raw/*
+data/processed/*
+
+# If you want to keep samples/reference data:
+!data/raw/README.md
+
+# -----------------------------
+# Jupyter noise
+# -----------------------------
+.ipynb_checkpoints/
+
+# -----------------------------
+# OS files
+# -----------------------------
+.DS_Store
+Thumbs.db
+
+# -----------------------------
+# IDE Files
+# -----------------------------
+.vscode/
+.idea/
+
+# -----------------------------
+# Temporary files
+# -----------------------------
+*.tmp
+*.temp
+*.swp
