@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 
+from llm.config import load_config
+
 class PlaceholderGPTModel(nn.Module):
     """
     Placeholder GPT model.
@@ -16,21 +18,21 @@ class PlaceholderGPTModel(nn.Module):
     """
     def __init__(self, cfg):
         super().__init__()
-        
+
         # Embedding layers
-        self.tok_emb = nn.Embedding(cfg.vocab_size, cfg.emb_dim)
-        self.pos_emb = nn.Embedding(cfg.context_length, cfg.emb_dim)
-        self.drop_emb = nn.Dropout(cfg.drop_rate)
+        self.tok_emb = nn.Embedding(cfg.get("vocab_size"), cfg.get("emb_dim"))
+        self.pos_emb = nn.Embedding(cfg.get("context_length"), cfg.get("emb_dim"))
+        self.drop_emb = nn.Dropout(cfg.get("drop_rate"))
         
         # Transformer blocks
         self.trf_blocks = nn.Sequential(
             *[PlaceholderTransformerBlock(cfg) # TODO: Replace with actual transformer block
-                for _ in range(cfg.n_layers)]
+                for _ in range(cfg.get("n_layers"))]
         )
 
         # Final layer norm and output head
-        self.final_norm = nn.LayerNorm(cfg.emb_dim) #TODO: Replace with actual layer norm
-        self.out.head = nn.Linear(cfg.emb_dim, cfg.vocab_size, bias=False)
+        self.final_norm = PlaceholderLayerNorm(cfg.get("emb_dim")) #TODO: Replace with actual layer norm
+        self.out_head = nn.Linear(cfg.get("emb_dim"), cfg.get("vocab_size"), bias=False)
 
     def forward(self, in_idx):
         """
@@ -59,7 +61,7 @@ class PlaceholderGPTModel(nn.Module):
         x = self.final_norm(x)
 
         # Output head
-        logits = self.out.head(x)
+        logits = self.out_head(x)
         return logits
     
 
