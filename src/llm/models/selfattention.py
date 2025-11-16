@@ -18,20 +18,24 @@ class SelfAttention(nn.Module):
         self.d_in = dim_in
         self.d_out = dim_out
 
-        # Trainable weight matricies mapping input -> query / key / value
+        # Trainable weight matrices mapping input -> query / key / value
         self.weight_query = nn.Parameter(torch.rand(dim_in,dim_out))
         self.weight_key   = nn.Parameter(torch.rand(dim_in,dim_out))
         self.weight_value = nn.Parameter(torch.rand(dim_in,dim_out))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
-        x shape:
-            [T, D_in]      single sequence
-         or [B, T, D_in]   batch of sequences
+        Compute self-attention for a single sequence.
+
+        Note:
+            This implementation assumes a 2D input [T, D_in]. For batched
+            inputs, use a batched variant that handles [B, T, D_in].
+
+        Args:
+            x: Input tensor of shape [T, D_in].
 
         Returns:
-            context vectors with same leading dims as x:
-            [T, D_out] or [B, T, D_out]
+            Context vectors of shape [T, D_out].
         """
 
         # Compute query, key and value vectors.
@@ -39,24 +43,25 @@ class SelfAttention(nn.Module):
         queries = x @ self.weight_query
         values = x @ self.weight_value
 
-        # Compute attention score similarly. Maxtrix math in
-        # place of dot-product between query and keys
+        # Compute attention scores via matrix multiplication
+        # (equivalent to pairwise dot-products between queries and keys).
         attention_scores = queries @ keys.T
 
-        # Compute attention weights through scaling by sqrt(d_k) which
-		# is the last dim of the keys.
+        # Scale by sqrt(d_k) (last dimension of keys) for stable gradients.
         scale = math.sqrt(keys.size(-1))
         attention_weights = torch.softmax(attention_scores / scale, dim=-1)
 
-        # Compute resulting context vector for self-attention layer
+        # Attention-weighted sum of values yields contextualized representations.
         context_vector = attention_weights @ values
 
-        torch.Tensor
-
+        # Debug prints
         print("-----------------------V1 TEST-----------------------")
-        print("q: ", self.weight_query)
-        print("k: ", self.weight_key)
-        print("v: ", self.weight_value)
+        print("keys: ", keys)
+        print("queries: ", queries)
+        print("values: ", values)
+        print("attention_scores: ", attention_scores)
+        print("attention_weights: ", attention_weights)
+        print("context_vector: ", context_vector)
 
 
 
@@ -65,9 +70,9 @@ class SelfAttention(nn.Module):
 
 class SelfAttentionV2(nn.Module):
     """
-    Enhanced to use pytorch nn.Linear layers to perform more efficient
-    matrix multiplcation whe bias units are disabled. Has optimized
-    weight init scheme resulting in more stable and efftive training
+    Enhanced to use PyTorch nn.Linear layers for more efficient matrix
+    multiplication (when bias units are disabled). Uses an optimized
+    weight initialization scheme for more stable and effective training.
 
     Args:
         dim_in:  Input embedding dimension.
@@ -81,22 +86,32 @@ class SelfAttentionV2(nn.Module):
         self.weight_value = nn.Linear(dim_in, dim_out, bias=qkv_bias)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # Compute query / key / value vectors and attention score
+        """
+        Compute self-attention for a single sequence [T, D_in].
+
+        Note:
+            This implementation assumes a 2D input [T, D_in]. For batched
+            inputs, use a batched variant that handles [B, T, D_in].
+        """
+        # Compute query / key / value projections and attention scores
         keys = self.weight_key(x)
         queries = self.weight_query(x)
         values = self.weight_value(x)
         attention_scores = queries @ keys.T
 
-        # Compute attention weights through scaling by sqrt(d_k) which
-        # is the last dim of the keys.
+        # Scale by sqrt(d_k) (last dimension of keys) for stable gradients.
         scale = math.sqrt(keys.size(-1))
         attention_weights = torch.softmax(attention_scores / scale, dim=-1)
 
         context_vector = attention_weights @ values
 
+        # Debug prints
         print("-----------------------V2 TEST-----------------------")
-        print("q: ", self.weight_query.weight.T)
-        print("k: ", self.weight_key.weight.T)
-        print("v: ", self.weight_value.weight.T)
+        print("keys: ", keys)
+        print("queries: ", queries)
+        print("values: ", values)
+        print("attention_scores: ", attention_scores)
+        print("attention_weights: ", attention_weights)
+        print("context_vector: ", context_vector)
 
         return context_vector

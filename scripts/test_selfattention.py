@@ -26,6 +26,5 @@ self_attn.weight_query = torch.nn.Parameter(self_attn2.weight_query.weight.T)
 self_attn.weight_key = torch.nn.Parameter(self_attn2.weight_key.weight.T)
 self_attn.weight_value = torch.nn.Parameter(self_attn2.weight_value.weight.T)
 
-print("Context Vector: ",self_attn(input_embeddings))
-print("Context Vector: ",self_attn2(input_embeddings))
-
+self_attn(input_embeddings)
+self_attn2(input_embeddings)
