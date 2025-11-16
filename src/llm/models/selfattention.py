@@ -53,6 +53,7 @@ class SelfAttention(nn.Module):
 
         torch.Tensor
 
+        print("-----------------------V1 TEST-----------------------")
         print("q: ", self.weight_query)
         print("k: ", self.weight_key)
         print("v: ", self.weight_value)
@@ -93,6 +94,7 @@ class SelfAttentionV2(nn.Module):
 
         context_vector = attention_weights @ values
 
+        print("-----------------------V2 TEST-----------------------")
         print("q: ", self.weight_query.weight.T)
         print("k: ", self.weight_key.weight.T)
         print("v: ", self.weight_value.weight.T)
