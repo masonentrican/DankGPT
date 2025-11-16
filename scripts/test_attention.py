@@ -1,7 +1,7 @@
 import torch
-from llm.models.selfattention import SelfAttention
+from llm.models.selfattention import SelfAttention, SelfAttentionV2
 
-torch.manual_seed(123)
+torch.manual_seed(789)
 
 # TEMP: Hardcoded embeddings (shape [6, 3])
 input_embeddings = torch.tensor([
@@ -20,6 +20,12 @@ print("d_in: ",d_in)
 print("d_out: ",d_out)
 
 self_attn = SelfAttention(d_in,d_out)
+self_attn2 = SelfAttentionV2(d_in,d_out)
 
-print(self_attn(input_embeddings))
+self_attn.weight_query = torch.nn.Parameter(self_attn2.weight_query.weight.T)
+self_attn.weight_key = torch.nn.Parameter(self_attn2.weight_key.weight.T)
+self_attn.weight_value = torch.nn.Parameter(self_attn2.weight_value.weight.T)
+
+print("V1: ",self_attn(input_embeddings))
+print("V2: ",self_attn2(input_embeddings))
 
