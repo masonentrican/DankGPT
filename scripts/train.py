@@ -6,7 +6,7 @@ from torch.nn import Embedding
 from torch.utils.data import DataLoader
 
 from llm.data.dataset import GPTDataset
-
+from llm.models.selfattention import SelfAttention
 
 # -------------------------------------------------------------------
 # Config
@@ -91,7 +91,7 @@ def main() -> None:
     # -------------------------------------------------------------------
     # Embed tokens
     # -------------------------------------------------------------------
-    token_embeddings = token_embedding_layer(inputs)
+    token_embeddings: Embedding = token_embedding_layer(inputs)
     print("Token Embeddings Shape\n", token_embeddings.shape, "\n")
     # -> (batch_size, max_length, OUTPUT_DIM)
 
@@ -105,7 +105,7 @@ def main() -> None:
     input_embeddings = token_embeddings + position_embeddings
     print("Input Embeddings Shape\n", input_embeddings.shape, "\n")
 
-    print("\nInputs have been embedded! Ready for LLM munching.")
+
 
 
 if __name__ == "__main__":
