@@ -51,5 +51,50 @@ class SelfAttention(nn.Module):
         # Compute resulting context vector for self-attention layer
         context_vector = attention_weights @ values
 
+        torch.Tensor
+
+        print("q: ", self.weight_query)
+        print("k: ", self.weight_key)
+        print("v: ", self.weight_value)
+
+
+
         return context_vector
 
+
+class SelfAttentionV2(nn.Module):
+    """
+    Enhanced to use pytorch nn.Linear layers to perform more efficient
+    matrix multiplcation whe bias units are disabled. Has optimized
+    weight init scheme resulting in more stable and efftive training
+
+    Args:
+        dim_in:  Input embedding dimension.
+        dim_out: Output embedding dimension (projected Q/K/V size).
+    """
+
+    def __init__(self, dim_in, dim_out, qkv_bias=False) -> None:
+        super().__init__()
+        self.weight_query = nn.Linear(dim_in, dim_out, bias=qkv_bias)
+        self.weight_key = nn.Linear(dim_in, dim_out, bias=qkv_bias)
+        self.weight_value = nn.Linear(dim_in, dim_out, bias=qkv_bias)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # Compute query / key / value vectors and attention score
+        keys = self.weight_key(x)
+        queries = self.weight_query(x)
+        values = self.weight_value(x)
+        attention_scores = queries @ keys.T
+
+        # Compute attention weights through scaling by sqrt(d_k) which
+        # is the last dim of the keys.
+        scale = math.sqrt(keys.size(-1))
+        attention_weights = torch.softmax(attention_scores / scale, dim=-1)
+
+        context_vector = attention_weights @ values
+
+        print("q: ", self.weight_query.weight.T)
+        print("k: ", self.weight_key.weight.T)
+        print("v: ", self.weight_value.weight.T)
+
+        return context_vector
