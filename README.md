@@ -1,49 +1,45 @@
 # DankGPT
 
-A minimal GPT-style language model project using Python, PyTorch, and tiktoken.  
-Includes text downloading, tokenization, dataset windowing, and a simple training loop.
-
----
+A GPT-style language model in progress, built with Python, PyTorch, and tiktoken.
 
 ## Setup
 
-git clone https://github.com/masonentrican/DankGPT.git  
+```bash
+git clone https://github.com/masonentrican/DankGPT.git
 cd DankGPT
 
 python -m venv .venv
-source .venv/bin/activate    # or .venv\Scripts\activate on Windows
+source .venv/bin/activate    # Windows: .venv\Scripts\activate
 
 pip install -e .
-
----
+```
 
 ## Prepare Data
 
+```bash
 python scripts/prepare_data.py
+```
 
-Downloads example text into data/raw/.
-
----
+Downloads example text into `data/raw/`.
 
 ## Train Model
 
+```bash
 python scripts/train.py
+```
 
 Runs a small GPT-style model on the prepared dataset.
 
----
-
 ## Project Structure
 
-src/llm/        # library code (dataset, tokenizer, model, training)  
-scripts/        # run scripts (prepare_data, train)  
-data/raw/       # downloaded data (ignored in git)  
-configs/        # optional configs
-
----
+```text
+src/llm/     # library code (dataset, tokenizer, model, training)
+scripts/     # run scripts (prepare_data, train)
+data/raw/    # downloaded data (ignored in git)
+configs/     # optional configs
+```
 
 ## Notes
 
-- data/raw/, .venv/, and build artifacts are ignored by git  
-- Project is installed in editable mode via: pip install -e .
-
+- `data/raw/`, `.venv/`, and build artifacts are ignored by git
+- Installed in editable mode via `pip install -e .`
