@@ -2,6 +2,109 @@ import math
 import torch
 import torch.nn as nn
 
+class MultiHeadAttention(nn.Module):
+    """
+    Multi-head-attention.
+
+    This module computes attention over a sequence using multiple heads.
+    Each head has its own query, key, and value projections.
+    The heads are combined and projected to the output dimension.
+
+    Args:
+        dim_in: Input embedding dimension.
+        dim_out: Output embedding dimension (query/key/value projections).
+        context_length: Maximum sequence length for which the causal mask is built.
+        dropout: Dropout probability applied to attention weights.
+        num_heads: Number of attention heads.
+        qkv_bias: Whether to include bias terms in Q/K/V projections.
+    """
+    def __init__(self,
+                dim_in: int,
+                dim_out: int,
+                context_length: int,
+                dropout: float = 0,
+                num_heads: int = 1,
+                qkv_bias: bool = False):
+        
+        super().__init__()
+        assert dim_out % num_heads == 0, "dim_out must be divisible by num_heads"
+
+        self.dim_out = dim_out
+        self.num_heads = num_heads
+        self.head_dim = dim_out // num_heads # Dimension per head (dim_out divided among heads)
+        self.weight_query = nn.Linear(dim_in, dim_out, bias=qkv_bias)
+        self.weight_key = nn.Linear(dim_in, dim_out, bias=qkv_bias)
+        self.weight_value = nn.Linear(dim_in, dim_out, bias=qkv_bias)
+        self.out_projection = nn.Linear(dim_out, dim_out) # Linear layer to combine head outputs
+        self.dropout = nn.Dropout(dropout)
+        self.register_buffer(
+            'mask', 
+            torch.triu(
+                torch.ones(
+                    context_length,
+                    context_length
+                ),
+                diagonal=1
+            )
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Compute multi-head attention over the input sequence.
+
+        Args:
+            x: Input tensor of shape [batch_size, num_tokens, dim_in].
+
+        Returns:
+            Tensor of shape [batch_size, num_tokens, dim_out] representing
+            the attention-weighted combination of value vectors.
+        """
+        b, num_tokens, dim_in = x.shape
+        
+        # Tensor shape: [(b)atch_size, num_(t)okens, (d)im_out]
+        keys = self.weight_key(x)      
+        queries = self.weight_query(x) 
+        values = self.weight_value(x)   
+        
+        # Split dim_out into num_heads and head_dim by reshaping:
+        # (b, num_tokens, dim_out) -> (b, num_tokens, num_heads, head_dim)
+        keys = keys.view(b, num_tokens, self.num_heads, self.head_dim)
+        values = values.view(b, num_tokens, self.num_heads, self.head_dim)
+        queries = queries.view(b, num_tokens, self.num_heads, self.head_dim)
+
+        # Transpose to move num_heads before num_tokens for batched attention computation:
+        # (b, num_tokens, num_heads, head_dim) -> (b, num_heads, num_tokens, head_dim)
+        keys = keys.transpose(1, 2)
+        queries = queries.transpose(1, 2)
+        values = values.transpose(1, 2)
+
+        # Compute attention scores for each head:
+        # (b, num_heads, num_tokens, head_dim) @ (b, num_heads, head_dim, num_tokens)
+        # -> (b, num_heads, num_tokens, num_tokens)
+        attention_scores = queries @ keys.transpose(2, 3)
+
+        # Apply causal mask so future positions are not attended to.
+        attention_scores.masked_fill_(self.mask.bool()[:num_tokens, :num_tokens], -torch.inf)
+
+        # Scale by sqrt(d_k) for stable gradients.
+        scale = keys.shape[-1]**0.5
+        attention_weights = torch.softmax(attention_scores / scale, dim=-1)
+        attention_weights = self.dropout(attention_weights)
+
+        # Apply attention weights to values:
+        # (b, num_heads, num_tokens, num_tokens) @ (b, num_heads, num_tokens, head_dim)
+        # -> (b, num_heads, num_tokens, head_dim)
+        # Transpose to move num_heads dimension: -> (b, num_tokens, num_heads, head_dim)
+        context_vector = (attention_weights @ values).transpose(1, 2)
+
+        # Reshape to combine heads: (b, num_tokens, num_heads, head_dim) -> (b, num_tokens, dim_out)
+        context_vector = context_vector.contiguous().view(b, num_tokens, self.dim_out)
+
+        # Final projection to output dimension
+        context_vector = self.out_projection(context_vector)
+
+        return context_vector
+
 class MultiHeadCausalAttention(nn.Module):
     """
     Multi-head causal self-attention.
@@ -102,12 +205,12 @@ class CausalAttention(nn.Module):
 
         # Debug prints
         print("-----------------------Causal Attention Test-----------------------")
-        print("q: ", self.weight_query.weight.T)
-        print("k: ", self.weight_key.weight.T)
-        print("v: ", self.weight_value.weight.T)
-        print("mask: ", self.mask)
-        print("attention_weights: ", attention_weights)
-        print("context_vector: ", context_vector)
+        print("q:\n ", self.weight_query.weight.T)
+        print("k:\n ", self.weight_key.weight.T)
+        print("v:\n ", self.weight_value.weight.T)
+        print("mask:\n ", self.mask)
+        print("attention_weights:\n ", attention_weights)
+        print("context_vector:\n ", context_vector)
 
         return context_vector
 
@@ -164,12 +267,12 @@ class SelfAttention(nn.Module):
 
         # Debug prints
         print("-----------------------V1 TEST-----------------------")
-        print("keys: ", keys)
-        print("queries: ", queries)
-        print("values: ", values)
-        print("attention_scores: ", attention_scores)
-        print("attention_weights: ", attention_weights)
-        print("context_vector: ", context_vector)
+        print("keys:\n ", keys)
+        print("queries:\n ", queries)
+        print("values:\n ", values)
+        print("attention_scores:\n ", attention_scores)
+        print("attention_weights:\n ", attention_weights)
+        print("context_vector:\n ", context_vector)
 
 
 
@@ -215,11 +318,11 @@ class SelfAttentionV2(nn.Module):
 
         # Debug prints
         print("-----------------------V2 TEST-----------------------")
-        print("keys: ", keys)
-        print("queries: ", queries)
-        print("values: ", values)
-        print("attention_scores: ", attention_scores)
-        print("attention_weights: ", attention_weights)
-        print("context_vector: ", context_vector)
+        print("keys:\n ", keys)
+        print("queries:\n ", queries)
+        print("values:\n ", values)
+        print("attention_scores:\n ", attention_scores)
+        print("attention_weights:\n ", attention_weights)
+        print("context_vector:\n ", context_vector)
 
         return context_vector

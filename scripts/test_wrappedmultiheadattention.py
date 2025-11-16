@@ -1,5 +1,5 @@
 import torch
-from llm.models.selfattention import MultiHeadAttention
+from llm.models.selfattention import MultiHeadCausalAttention
 
 torch.manual_seed(123)
 
@@ -19,8 +19,7 @@ d_out = 2
 batch = torch.stack((input_embeddings, input_embeddings), dim=0)
 context_length = batch.shape[1]
 
-multihead_attn = MultiHeadAttention(d_in, d_out, context_length, num_heads=2)
+multihead_attn = MultiHeadCausalAttention(d_in, d_out, context_length, 0.0, num_heads=2)
 context_vectors = multihead_attn(batch)
 
-print("Context Vectors:\n ", context_vectors)
 print("Context Vectors Shape:\n ", context_vectors.shape)
