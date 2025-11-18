@@ -10,7 +10,8 @@ requires-python = ">=3.11"
 dependencies = [
   "torch",
   "tiktoken",
-  "numpy"
+  "numpy",
+  "matplotlib",
 ]
 
 [tool.setuptools.packages.find]
