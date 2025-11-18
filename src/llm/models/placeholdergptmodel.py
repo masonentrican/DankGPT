@@ -31,7 +31,7 @@ class PlaceholderGPTModel(nn.Module):
         )
 
         # Final layer norm and output head
-        self.final_norm = PlaceholderLayerNorm(cfg.get("emb_dim")) #TODO: Replace with actual layer norm
+        self.final_norm = LayerNormalization(cfg.get("emb_dim"))
         self.out_head = nn.Linear(cfg.get("emb_dim"), cfg.get("vocab_size"), bias=False)
 
     def forward(self, in_idx):
@@ -86,21 +86,42 @@ class PlaceholderTransformerBlock(nn.Module):
 
  
 
-class PlaceholderLayerNorm(nn.Module):
+class LayerNormalization(nn.Module):
     """
-    Placeholder layer norm.
+    Layer normalization module.
 
-    This layer norm is a placeholder for the actual layer norm.
-    It is used to test the training and inference pipeline.
+    Operates on the last dimension of the input tensor x, representing the embedding dimension.
+    Scale and shift are trainable parameters.
 
     Args:
-        cfg: Configuration dictionary.
+        emb_dim: Embedding dimension.
 
     Returns:
         torch.Tensor: Output tensor.
     """
-    def __init__(self, cfg): # TODO: Replace with actual layer norm
+    def __init__(self, emb_dim):
         super().__init__()
 
-    def forward(self, x): # TODO: Replace with actual layer norm forward pass
-        return x
+        self.eps = 1e-5 # Epsilon for numerical stability
+        self.scale = nn.Parameter(torch.ones(emb_dim))
+        self.shift = nn.Parameter(torch.zeros(emb_dim))
+
+
+    def forward(self, x):
+        """
+        Forward pass for the layer normalization module.
+
+        Computes the mean and variance of the input tensor x along the last dimension.
+        Then normalizes the input tensor using the mean and variance.
+        Finally, applies the scale and shift parameters to the normalized input tensor.
+
+        Args:
+            x: Input tensor.
+
+        Returns:
+            torch.Tensor: Output tensor.
+        """
+        mean = x.mean(dim=-1, keepdim=True)
+        variance = x.var(dim=-1, keepdim=True, unbiased=False) # GPT2's model uses unbiased=False
+        norm_x = (x - mean) / torch.sqrt(variance + self.eps)
+        return self.scale * norm_x + self.shift
