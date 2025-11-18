@@ -74,15 +74,18 @@ Total size in MB:
 NOTE: Total parameters exceed the configured model parameter size (124M) because weight tying
       has not been implemented. Weight tying shares weights between the input embedding layer
       and the output projection layer, reducing the total parameter count. While this technique
-      reduces memoery and computational complexity, it may reduce model/training performance.
+      reduces memory and computational complexity, it may reduce model/training performance.
 
       Parameter breakdown (without weight tying):
       
-      Token Embedding: vocab_size x emb_dim = 50,257 x 768 = 38,597,376
-      Positional Embedding: context_length x emb_dim = 1,024 x 768 = 786,432
-      Embedding Subtotal: 38,597,376 + 786,432 = 39,383,808
+      Embeddings: (vocab_size x emb_dim) + (context_length x emb_dim) = (50,257 x 768) + (1,024 x 768) = 39.4M
+
+      Transformer blocks (12x): Each block has self-attention (QKV: 768→2304, out: 768→768) and 
+      MLP (768→3072→768) plus 2 layer norms = ~7.1M per block → 84.1M total
+
+      Final layer norm: 768 + 768 = 1.5K
+      Output head: vocab_size x emb_dim = 50,257 x 768 = 38.6M
       
-      The remaining parameters come from the transformer blocks (attention, MLP, layer norms)
-      and the output projection head. With weight tying, the output head would share weights
-      with the token embedding layer, eliminating ~38.6M parameters from the total count.
+      Total without weight tying: 39.4M + 84.1M + 0.0015M + 38.6M ≈ 163M
+      Total With weight tying:            39.4M + 84.1M + 0.0015M ≈ 124.4M
 """
