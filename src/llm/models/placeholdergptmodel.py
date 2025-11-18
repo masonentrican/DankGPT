@@ -3,6 +3,8 @@ import torch
 import torch.nn as nn
 
 from llm.config import load_config
+from llm.models.embeddings import GPTEmbedding
+from llm.models.normalization import LayerNormalization
 
 class PlaceholderGPTModel(nn.Module):
     """
@@ -19,12 +21,13 @@ class PlaceholderGPTModel(nn.Module):
     """
     def __init__(self, cfg):
         super().__init__()
+        self.emb = GPTEmbedding(
+            vocab_size=cfg.get("vocab_size"),
+            context_length=cfg.get("context_length"),
+            emb_dim=cfg.get("emb_dim"),
+            drop_rate=cfg.get("drop_rate")
+        )
 
-        # Embedding layers
-        self.tok_emb = nn.Embedding(cfg.get("vocab_size"), cfg.get("emb_dim"))
-        self.pos_emb = nn.Embedding(cfg.get("context_length"), cfg.get("emb_dim"))
-        self.drop_emb = nn.Dropout(cfg.get("drop_rate"))
-        
         # Transformer blocks
         self.trf_blocks = nn.Sequential(
             *[PlaceholderTransformerBlock(cfg) # TODO: Replace with actual transformer block
@@ -37,7 +40,7 @@ class PlaceholderGPTModel(nn.Module):
 
     def forward(self, in_idx):
         """
-        Forward pass for the placeholder GPT model.
+        Forward pass.
 
         Describes the data flow through the model. Computes the token embeddings, positional
         embeddings, and applies dropout. Then passes the output through the transformer blocks
@@ -49,19 +52,9 @@ class PlaceholderGPTModel(nn.Module):
         Returns:
             torch.Tensor: Output logits.
         """
-        batch_size, seq_len = in_idx.shape
-        
-        # Embed tokens and positions
-        tok_embeds = self.tok_emb(in_idx)
-        pos_embeds = self.pos_emb(torch.arange(seq_len, device=in_idx.device))
-
-        # Combine embeddings and apply dropout
-        x = tok_embeds + pos_embeds
-        x = self.drop_emb(x)
+        x = self.emb(in_idx)
         x = self.trf_blocks(x)
         x = self.final_norm(x)
-
-        # Output head
         logits = self.out_head(x)
         return logits
     
@@ -84,78 +77,3 @@ class PlaceholderTransformerBlock(nn.Module):
 
     def forward(self, x): # TODO: Replace with actual transformer block forward pass
         return x
-
- 
-
-class LayerNormalization(nn.Module):
-    """
-    Layer normalization module.
-
-    Operates on the last dimension of the input tensor x, representing the embedding dimension.
-    Scale and shift are trainable parameters.
-
-    Args:
-        emb_dim: Embedding dimension.
-
-    Returns:
-        torch.Tensor: Output tensor.
-    """
-    def __init__(self, emb_dim):
-        super().__init__()
-
-        self.eps = 1e-5 # Epsilon for numerical stability
-        self.scale = nn.Parameter(torch.ones(emb_dim))
-        self.shift = nn.Parameter(torch.zeros(emb_dim))
-
-
-    def forward(self, x):
-        """
-        Forward pass for the layer normalization module.
-
-        Computes the mean and variance of the input tensor x along the last dimension.
-        Then normalizes the input tensor using the mean and variance.
-        Finally, applies the scale and shift parameters to the normalized input tensor.
-
-        Args:
-            x: Input tensor.
-
-        Returns:
-            torch.Tensor: Output tensor.
-        """
-        mean = x.mean(dim=-1, keepdim=True)
-        variance = x.var(dim=-1, keepdim=True, unbiased=False) # GPT2's model uses unbiased=False
-        norm_x = (x - mean) / torch.sqrt(variance + self.eps)
-        return self.scale * norm_x + self.shift
-
-
-class FeedForward(nn.Module):
-    """
-    Feed-forward layer.
-
-    This layer is a feed-forward layer.
-    It is used to introduce non-linearity into the model.
-    """
-    def __init__(self, cfg):
-        super().__init__()
-        self.layers = nn.Sequential(
-            nn.Linear(cfg.get("emb_dim"), 4 * cfg.get("emb_dim")),
-            GELU(),
-            nn.Linear(4 * cfg.get("emb_dim"), cfg.get("emb_dim")),
-        )
-
-    def forward(self, x):
-        return self.layers(x)
-
-
-class GELU(nn.Module):
-    """
-    GELU activation function.
-
-    This activation function is a smooth approximation of the ReLU function.
-    Useful for introducing non-linearity into the model like in the feed-forward layer.
-    """
-    def __init__(self):
-        super().__init__()
-
-    def forward(self, x):
-        return 0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * torch.pow(x, 3))))

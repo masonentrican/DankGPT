@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 import torch
+
 from pathlib import Path
-from llm.models.placeholdergptmodel import GELU
+
+from llm.models.feedforward import GELU
 
 """
 Test the GELU and ReLU activation functions.
