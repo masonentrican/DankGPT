@@ -4,7 +4,7 @@ import torch.nn as nn
 
 from llm.config import load_config
 from llm.models.embeddings import GPTEmbedding
-from llm.models.normalization import LayerNormalization
+from llm.models.normalization import Normalization
 
 class PlaceholderGPTModel(nn.Module):
     """
@@ -31,11 +31,11 @@ class PlaceholderGPTModel(nn.Module):
         # Transformer blocks
         self.trf_blocks = nn.Sequential(
             *[PlaceholderTransformerBlock(cfg) # TODO: Replace with actual transformer block
-                for _ in range(cfg.get("n_layers"))]
+                for _ in range(cfg.get("num_layers"))]
         )
 
         # Final layer norm and output head
-        self.final_norm = LayerNormalization(cfg.get("emb_dim"))
+        self.final_norm = Normalization(cfg.get("emb_dim"))
         self.out_head = nn.Linear(cfg.get("emb_dim"), cfg.get("vocab_size"), bias=False)
 
     def forward(self, in_idx):

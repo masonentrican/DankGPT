@@ -20,8 +20,8 @@ def main():
     # Access specific values
     print(f"Vocabulary size: {config['vocab_size']}")
     print(f"Embedding dimension: {config['emb_dim']}")
-    print(f"Number of layers: {config['n_layers']}")
-    print(f"Number of heads: {config['n_heads']}")
+    print(f"Number of layers: {config['num_layers']}")
+    print(f"Number of heads: {config['num_heads']}")
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,7 @@
 import torch
 import tiktoken
 from llm.config import load_config
-from llm.models.placeholdergptmodel import LayerNormalization
+from llm.models.normalization import Normalization
 
 
 # Prepare batch (two training examples with 5 dimensions)
@@ -11,7 +11,7 @@ batch = torch.randn(2, emb_dim)
 
 # Test layer normalization with static seed
 torch.manual_seed(123)
-ln = LayerNormalization(emb_dim)
+ln = Normalization(emb_dim)
 output = ln(batch)
 mean = output.mean(dim=-1, keepdim=True)
 variance = output.var(dim=-1, keepdim=True, unbiased=False)

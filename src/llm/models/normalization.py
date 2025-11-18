@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-class LayerNormalization(nn.Module):
+class Normalization(nn.Module):
     """
     Layer normalization module.
 

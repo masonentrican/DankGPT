@@ -76,7 +76,7 @@ def load_config(config_name: str) -> Dict[str, Any]:
             attr = getattr(module, attr_name)
             if isinstance(attr, dict) and len(attr) > 0:
                 # Check if it looks like a config (has common keys)
-                if any(key in attr for key in ["vocab_size", "emb_dim", "n_layers", "context_length"]):
+                if any(key in attr for key in ["vocab_size", "emb_dim", "num_layers", "context_length"]):
                     return attr
     
     raise ValueError(
