@@ -16,7 +16,7 @@ batch = torch.stack(batch, dim=0)
 
 # Test model with static seed
 torch.manual_seed(123)
-model = GPTModel(load_config("gpt_config_124m"))
+model = GPTModel(load_config("gpt2_xlarge"))
 logits = model(batch)
 
 # Analaytics
