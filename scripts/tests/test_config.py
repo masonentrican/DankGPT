@@ -9,7 +9,7 @@ def main():
     print()
     
     # Load the 124M config
-    config = load_config("gpt_config_124m")
+    config = load_config("gpt2_small")
     
     print("GPT-2 124M Configuration:")
     print("-" * 40)
