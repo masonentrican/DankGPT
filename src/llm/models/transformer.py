@@ -1,8 +1,6 @@
 import torch
 import torch.nn as nn
 
-from llm.config import load_config
-
 from llm.models.selfattention import MultiHeadAttention
 from llm.models.feedforward import FeedForward
 from llm.models.normalization import Normalization

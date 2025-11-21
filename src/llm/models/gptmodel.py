@@ -2,7 +2,6 @@ import math
 import torch
 import torch.nn as nn
 
-from llm.config import load_config
 from llm.models.embeddings import GPTEmbedding
 from llm.models.normalization import Normalization
 from llm.models.transformer import Transformer

@@ -1,18 +1,36 @@
 """
 Test script for text generation using the GPT model.
-
-This script tests the basic text generation functionality by:
-1. Loading a GPT model configuration
-2. Encoding an initial context string
-3. Generating new tokens using greedy decoding
-4. Decoding and displaying the generated text
 """
 
 import torch
 import tiktoken
-from llm.config import load_config
+from llm.config import GPT2_SMALL
 from llm.models.gptmodel import GPTModel
 
+def main():
+    """
+    Main function to test the text generation functionality.
+    """
+    cfg = GPT2_SMALL
+    torch.manual_seed(123)
+    tokenizer = tiktoken.get_encoding("gpt2")
+    
+    model = GPTModel(cfg)
+    model.eval()
+
+    # Define the starting context/prompt
+    start_context = "Every effort moves you"
+    print(f"INPUT: {start_context}")
+
+    # Generate new tokens
+    token_ids = generate_text_simple(
+        model=model,
+        idx=text_to_token_ids(start_context, tokenizer),
+        max_new_tokens=10,
+        context_size=cfg["context_length"]
+    )
+
+    print(f"DANK GPT SAYS: {token_ids_to_text(token_ids, tokenizer)}")
 
 def generate_text_simple(model, idx, max_new_tokens, context_size):
     """
@@ -52,45 +70,14 @@ def generate_text_simple(model, idx, max_new_tokens, context_size):
     
     return idx
 
+def text_to_token_ids(text, tokenizer):
+    encoded = tokenizer.encode(text)
+    encoded_tensor = torch.tensor(encoded).unsqueeze(0) # Unsqueeze to add batch dimension
+    return encoded_tensor
 
-# ============================================================================
-# Test Configuration and Setup
-# ============================================================================
+def token_ids_to_text(token_ids, tokenizer):
+    flat = token_ids.squeeze(0) # Squeeze to remove batch dimension
+    return tokenizer.decode(flat.tolist())
 
-# Load model configuration
-cfg = load_config("gpt2_small")
-
-# Initialize tokenizer (GPT-2 BPE encoding)
-tokenizer = tiktoken.get_encoding("gpt2")
-
-# Initialize the GPT model
-model = GPTModel(cfg)
-
-# Set model to evaluation mode (disables dropout, batch norm updates, etc.)
-model.eval()
-
-# ============================================================================
-# Text Generation Test
-# ============================================================================
-
-# Define the starting context/prompt
-start_context = "Hello, I am"
-print(f"INPUT: {start_context}")
-
-# Encode the text into token IDs
-encoded = tokenizer.encode(start_context)
-
-# Convert to tensor and add batch dimension: (seq_len,) -> (1, seq_len)
-encoded_tensor = torch.tensor(encoded).unsqueeze(0)
-
-# Generate new tokens
-out = generate_text_simple(
-    model=model,
-    idx=encoded_tensor,
-    max_new_tokens=9,
-    context_size=cfg["context_length"]
-)
-
-# Decode the generated tokens back to text
-decoded_text = tokenizer.decode(out[0].tolist())
-print(f"DANK GPT SAYS: {decoded_text}")
+if __name__ == "__main__":
+    main()

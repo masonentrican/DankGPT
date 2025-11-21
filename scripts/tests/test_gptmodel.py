@@ -1,6 +1,6 @@
 import torch
 import tiktoken
-from llm.config import load_config
+from llm.config import GPT2_SMALL
 from llm.models.gptmodel import GPTModel
 
 
@@ -16,7 +16,7 @@ batch = torch.stack(batch, dim=0)
 
 # Test model with static seed
 torch.manual_seed(123)
-model = GPTModel(load_config("gpt2_small"))
+model = GPTModel(GPT2_SMALL)
 logits = model(batch)
 
 # Analaytics

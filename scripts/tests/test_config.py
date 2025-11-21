@@ -2,16 +2,16 @@
 Test script to demonstrate loading and using model configurations.
 """
 
-from llm.config import load_config, list_available_configs
+from llm.config import GPT2_SMALL, GPT2_MEDIUM, GPT2_LARGE, GPT2_XLARGE
 
 def main():
-    print("Available configs:", list_available_configs())
+    print("Available configs: GPT2_SMALL, GPT2_MEDIUM, GPT2_LARGE, GPT2_XLARGE")
     print()
     
-    # Load the 124M config
-    config = load_config("gpt2_small")
+    # Use the GPT-2 Small config
+    config = GPT2_SMALL
     
-    print("GPT-2 124M Configuration:")
+    print("GPT-2 Small (124M) Configuration:")
     print("-" * 40)
     for key, value in config.items():
         print(f"  {key}: {value}")

@@ -1,6 +1,5 @@
 import torch
 import tiktoken
-from llm.config import load_config
 from llm.models.normalization import Normalization
 
 
