@@ -6,6 +6,17 @@ All model configurations are available directly:
 """
 
 # GPT-2 Small (124M parameters)
+SMOOTHBRAIN = {
+    "vocab_size": 50257,      # Vocabulary size
+    "context_length": 256,   # Context length
+    "emb_dim": 768,           # Embedding dimension
+    "num_heads": 12,          # Number of attention heads
+    "num_layers": 12,         # Number of layers
+    "drop_rate": 0.1,         # Dropout rate
+    "qkv_bias": False         # Query-Key-Value bias
+}
+
+# GPT-2 Small (124M parameters)
 GPT2_SMALL = {
     "vocab_size": 50257,      # Vocabulary size
     "context_length": 1024,   # Context length
@@ -50,6 +61,7 @@ GPT2_XLARGE = {
 }
 
 __all__ = [
+    "SMOOTHBRAIN",
     "GPT2_SMALL",
     "GPT2_MEDIUM",
     "GPT2_LARGE",

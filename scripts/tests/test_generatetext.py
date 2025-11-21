@@ -4,14 +4,14 @@ Test script for text generation using the GPT model.
 
 import torch
 import tiktoken
-from llm.config import GPT2_SMALL
+from llm.config import SMOOTHBRAIN
 from llm.models.gptmodel import GPTModel
 
 def main():
     """
     Main function to test the text generation functionality.
     """
-    cfg = GPT2_SMALL
+    cfg = SMOOTHBRAIN
     torch.manual_seed(123)
     tokenizer = tiktoken.get_encoding("gpt2")
     
