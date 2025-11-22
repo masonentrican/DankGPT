@@ -20,8 +20,7 @@ def calc_loss_batch(input_batch, target_batch, model, device):
     Returns:
         torch.Tensor: Loss value.
     """
-    input_batch = input_batch.to(device)
-    target_batch = target_batch.to(device)
+    input_batch, target_batch = input_batch.to(device), target_batch.to(device)
     logits = model(input_batch)
     loss = torch.nn.functional.cross_entropy(logits.flatten(0, 1), target_batch.flatten())
     return loss
@@ -98,10 +97,11 @@ def train_model_simple(model, train_loader, val_loader, optimizer, device, num_e
         tuple: (train_losses, val_losses, track_tokens_seen)
     """
     train_losses, val_losses, track_tokens_seen = [], [], []  # Track losses
-    tokens_seen, global_step = 0, 0  # Track tokens seen and global step
+    tokens_seen, global_step = 0, -1  # Track tokens seen and global step
 
     for epoch in range(num_epochs):
         model.train()
+        
         for input_batch, target_batch in train_loader:
             optimizer.zero_grad()  # Reset loss gradient from previous batch iteration
             loss = calc_loss_batch(input_batch, target_batch, model, device)
@@ -116,8 +116,13 @@ def train_model_simple(model, train_loader, val_loader, optimizer, device, num_e
                 train_losses.append(train_loss)
                 val_losses.append(val_loss)
                 track_tokens_seen.append(tokens_seen)
-                print(f"Epoch {epoch+1}, Step {global_step}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
-                generate_and_print_sample(model, tokenizer, device, start_context)
+                print(f"Epoch {epoch+1}, Step {global_step:06d}: "
+                f"Train Loss: {train_loss:.4f}, "
+                f"Val Loss: {val_loss:.4f}, "
+                f"Tokens seen: {tokens_seen:08d}")
+    
+        # Gen and print per Epoch - NOT step
+        generate_and_print_sample(model, tokenizer, device, start_context)
 
     return train_losses, val_losses, track_tokens_seen
 

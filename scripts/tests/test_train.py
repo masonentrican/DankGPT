@@ -6,6 +6,7 @@ from llm.config import SMOOTHBRAIN
 from llm.data.loader import create_dataloader
 from llm.models.gptmodel import GPTModel
 from llm.training import train_model_simple
+from llm.utils.plot import plot_losses
 
 def main():
     """
@@ -62,7 +63,7 @@ def main():
     # Configure training parameters
     # ============================================================================
     # Number of complete passes through the training dataset
-    num_epochs = 1
+    num_epochs = 10
     
     start_context = "Every effort moves you"
     print(f"INPUT: {start_context}")
@@ -88,6 +89,12 @@ def main():
         model, train_loader, val_loader, optimizer, device, num_epochs, 
         eval_freq=5, eval_iter=5, start_context=start_context, tokenizer=tokenizer
     )
+
+    # ============================================================================
+    # Plot losses
+    # ============================================================================    
+    epochs_tensor = torch.linspace(0, num_epochs, len(train_losses))
+    plot_losses("training_losses.png", epochs_tensor, tokens_seen, train_losses, val_losses)
 
 if __name__ == "__main__":
     main()
