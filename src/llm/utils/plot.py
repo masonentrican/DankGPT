@@ -1,6 +1,16 @@
 from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
+import torch
+
+def save_plot(plotname):
+    # Ensure charts directory exists (relative to project root)
+    project_root = Path(__file__).resolve().parents[3]
+    charts_dir = project_root / "scripts" / "charts"
+    charts_dir.mkdir(exist_ok=True)
+
+    plt.savefig(charts_dir / plotname, dpi=150)
+    print(f"Saved plot to {charts_dir / plotname}")
 
 def plot_losses(plotname, epochs_seen, tokens_seen, train_losses, val_losses):
     fig, ax1 = plt.subplots(figsize=(5, 3))
@@ -17,10 +27,21 @@ def plot_losses(plotname, epochs_seen, tokens_seen, train_losses, val_losses):
     ax2.set_xlabel("Tokens seen")
     fig.tight_layout()
 
-    # Ensure charts directory exists (relative to project root)
-    project_root = Path(__file__).resolve().parents[3]
-    charts_dir = project_root / "scripts" / "charts"
-    charts_dir.mkdir(exist_ok=True)
+    save_plot(plotname)
 
-    plt.savefig(charts_dir / plotname, dpi=150)
-    print(f"Saved plot to {charts_dir / plotname}")
+def plot_temperature_scaling(scaled_probas, vocab, temperatures):
+    x = torch.arange(len(vocab))
+    bar_width = 0.15
+
+    fig, ax = plt.subplots(figsize=(5, 3))
+    for i, T in enumerate(temperatures):
+        rects = ax.bar(x + i * bar_width, scaled_probas[i], bar_width, label=f'Temperature = {T}')
+
+    ax.set_ylabel('Probability')
+    ax.set_xticks(x)
+    ax.set_xticklabels(vocab.keys(), rotation=90)
+    ax.legend()
+
+    plt.tight_layout()
+
+    save_plot("temperature_scaling.png")
