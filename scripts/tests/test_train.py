@@ -91,6 +91,21 @@ def main():
     )
 
     # ============================================================================
+    # Save the model
+    # ============================================================================
+    models_dir = project_root / "models"
+    models_dir.mkdir(exist_ok=True)
+    model_path = models_dir / "model_and_optimizer.pth"
+    
+    torch.save({
+        "model_state_dict": model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict(),
+        }, 
+        model_path
+    )
+    print(f"Saved model and optimizer to {model_path}")
+
+    # ============================================================================
     # Plot losses
     # ============================================================================    
     epochs_tensor = torch.linspace(0, num_epochs, len(train_losses))
