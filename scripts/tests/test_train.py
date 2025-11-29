@@ -12,33 +12,57 @@ def main():
     """
     Main function to test the training and validation functionality.
     """
+    
+    # ============================================================================
+    # Configuration
+    # ============================================================================
+    torch.manual_seed(123)
+    cfg = SMOOTHBRAIN
+    
+    # Training parameters
+    start_context = "Every effort moves you"
+    train_ratio = 0.90
+    num_epochs = 10
+    batch_size = 8
+    max_length = 4
+    stride = 4
 
     # ============================================================================
-    # Load raw text data from file
+    # IO Bootstrap
     # ============================================================================
     project_root = Path(__file__).resolve().parents[2]
     raw_dir = project_root / "data" / "raw"
+    model_dir = project_root / "models"
+    
+    # Training data
     raw_file = raw_dir / "the-verdict.txt"
     text_data = raw_file.read_text(encoding="utf-8")
+    
+    # Model and optimizer checkpoint
+    model_file = model_dir / "model_and_optimizer.pth"
 
     # ============================================================================
-    # Initialize model configuration and training components
+    # Start from previous model checkpoint if it exists, otherwise start fresh
     # ============================================================================
-    # Load the model configuration (defines architecture: layers, heads, dimensions, etc.)
-    cfg = SMOOTHBRAIN
-    torch.manual_seed(123)
 
-    # Initialize tokenizer to convert text to/from token IDs (using GPT-2 encoding)
     tokenizer = tiktoken.get_encoding("gpt2")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
-    # Create the GPT model instance with the specified configuration
-    model = GPTModel(cfg)
-    model.to(device)
 
-    # Initialize optimizer to update model weights during training
-    # AdamW with learning rate 0.0004 and weight decay 0.1 for regularization
-    optimizer = torch.optim.AdamW(model.parameters(), lr=0.0004, weight_decay=0.1)
+    if model_file.exists():
+        # Load existing checkpoint
+        print(f"Loading checkpoint from {model_file}")
+        checkpoint = torch.load(model_file)
+        model = GPTModel(cfg)
+        model.load_state_dict(checkpoint["model_state_dict"])
+        model.to(device)
+        optimizer = torch.optim.AdamW(model.parameters(), lr=0.0004, weight_decay=0.1)
+        optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+    else:
+        # Initialize fresh model and optimizer
+        print(f"No checkpoint found at {model_file}, starting fresh")
+        model = GPTModel(cfg)
+        model.to(device)
+        optimizer = torch.optim.AdamW(model.parameters(), lr=0.0004, weight_decay=0.1)
 
     # ============================================================================
     # Dataset statistics
@@ -51,11 +75,7 @@ def main():
     # ============================================================================
     # Split data into training and validation sets
     # ============================================================================
-    # Reserve 90% of data for training, 10% for validation
-    train_ratio = 0.90
     split_idx = int(train_ratio * len(text_data))
-    
-    # Split text
     train_data = text_data[:split_idx]
     val_data = text_data[split_idx:]
 
@@ -63,20 +83,9 @@ def main():
     # Configure training parameters
     # ============================================================================
     # Number of complete passes through the training dataset
-    num_epochs = 1
-    
-    start_context = "Every effort moves you"
     print(f"INPUT: {start_context}")
-
-    # ============================================================================
-    # Create data loaders for batching
-    # ============================================================================
-    # Create data loaders that split text into fixed-length sequences
-    # batch_size=8: process 8 sequences simultaneously
-    # max_length=4: each sequence is 4 tokens long
-    # stride=4: non-overlapping sequences (move 4 tokens forward each time)
-    train_loader = create_dataloader(train_data, batch_size=8, max_length=4, stride=4)
-    val_loader = create_dataloader(val_data, batch_size=8, max_length=4, stride=4)
+    train_loader = create_dataloader(train_data, batch_size=batch_size, max_length=max_length, stride=stride)
+    val_loader = create_dataloader(val_data, batch_size=batch_size, max_length=max_length, stride=stride)
 
     # ============================================================================
     # Execute training loop
