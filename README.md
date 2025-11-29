@@ -22,6 +22,14 @@ python scripts/prepare_data.py
 
 Downloads example text into `data/raw/`.
 
+## Download OpenAI Weights (Optional)
+
+```bash
+python scripts/load_gpt2_model.py
+```
+
+Downloads GPT-2 124M weights from OpenAI into `models/gpt2/`.
+
 ## Train Model
 
 ```bash

@@ -12,6 +12,9 @@ dependencies = [
   "tiktoken",
   "numpy",
   "matplotlib",
+  "tensorflow",
+  "tqdm",
+  "requests",
 ]
 
 [tool.setuptools.packages.find]

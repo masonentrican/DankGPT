@@ -48,13 +48,15 @@ tensorboard/
 charts/
 
 # -----------------------------
+# Models
+# -----------------------------
+models/gpt2/*
+
+# -----------------------------
 # Data folders
 # -----------------------------
 data/raw/*
 data/processed/*
-
-# If you want to keep samples/reference data:
-!data/raw/README.md
 
 # -----------------------------
 # Jupyter noise
