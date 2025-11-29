@@ -63,7 +63,7 @@ def main():
     # Configure training parameters
     # ============================================================================
     # Number of complete passes through the training dataset
-    num_epochs = 10
+    num_epochs = 1
     
     start_context = "Every effort moves you"
     print(f"INPUT: {start_context}")
