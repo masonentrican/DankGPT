@@ -1,12 +1,12 @@
-from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import torch
 
+from config.paths import PROJECT_ROOT
+
 def save_plot(plotname):
     # Ensure charts directory exists (relative to project root)
-    project_root = Path(__file__).resolve().parents[3]
-    charts_dir = project_root / "scripts" / "charts"
+    charts_dir = PROJECT_ROOT / "charts"
     charts_dir.mkdir(exist_ok=True)
 
     plt.savefig(charts_dir / plotname, dpi=150)

@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import torch
 
-from pathlib import Path
-
+from config.paths import PROJECT_ROOT
 from llm.models.feedforward import GELU
 
 """
@@ -24,7 +23,6 @@ for i, (y, label) in enumerate(zip([y_gelu, y_relu], ["GELU", "ReLU"]), 1):
 plt.tight_layout()
 
 # Ensure charts directory exists (relative to project root)
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
 charts_dir = PROJECT_ROOT / "charts"
 charts_dir.mkdir(exist_ok=True)
 

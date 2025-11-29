@@ -1,8 +1,8 @@
 import torch
 import tiktoken
-from pathlib import Path
 
 from config.models import SMOOTHBRAIN
+from config.paths import DATA_DIR, MODELS_DIR
 from llm.data.loader import create_dataloader
 from llm.models.gptmodel import GPTModel
 from llm.training import train_model_simple
@@ -30,9 +30,8 @@ def main():
     # ============================================================================
     # IO Bootstrap
     # ============================================================================
-    project_root = Path(__file__).resolve().parents[2]
-    raw_dir = project_root / "data" / "raw"
-    model_dir = project_root / "models"
+    raw_dir = DATA_DIR / "raw"
+    model_dir = MODELS_DIR
     
     # Training data
     raw_file = raw_dir / "the-verdict.txt"
@@ -102,9 +101,8 @@ def main():
     # ============================================================================
     # Save the model
     # ============================================================================
-    models_dir = project_root / "models"
-    models_dir.mkdir(exist_ok=True)
-    model_path = models_dir / "model_and_optimizer.pth"
+    model_dir.mkdir(exist_ok=True)
+    model_path = model_dir / "model_and_optimizer.pth"
     
     torch.save({
         "model_state_dict": model.state_dict(),

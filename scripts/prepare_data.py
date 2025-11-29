@@ -1,11 +1,7 @@
-from pathlib import Path
+from config.paths import DATA_DIR
 from llm.data.importer import download_text
-import sys
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-sys.path.append(str(PROJECT_ROOT / "src"))
-
-RAW_DIR = PROJECT_ROOT / "data" / "raw"
+RAW_DIR = DATA_DIR / "raw"
 URL = "https://raw.githubusercontent.com/rasbt/LLMs-from-scratch/refs/heads/main/ch02/01_main-chapter-code/the-verdict.txt"
 FILE_NAME = "the-verdict.txt"
 

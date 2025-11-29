@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import tiktoken
 import torch
 from torch.nn import Embedding
@@ -7,12 +5,12 @@ from torch.utils.data import DataLoader
 
 from llm.data.dataset import GPTDataset
 from llm.models.selfattention import SelfAttention
+from config.paths import DATA_DIR
 
 # -------------------------------------------------------------------
 # Config
 # -------------------------------------------------------------------
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-RAW_DIR = PROJECT_ROOT / "data" / "raw"
+RAW_DIR = DATA_DIR / "raw"
 RAW_FILE = RAW_DIR / "the-verdict.txt"
 
 MAX_LENGTH = 4        # sequence length (tokens per sample)

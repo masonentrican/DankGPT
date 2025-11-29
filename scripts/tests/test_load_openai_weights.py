@@ -7,10 +7,10 @@ from llm.utils.tokenization import text_to_token_ids, token_ids_to_text
 from llm.utils.weights import load_openai_weights_into_gpt
 from llm.models.gptmodel import GPTModel
 from config.models import GPT2_SMALL
+from config.paths import PROJECT_ROOT, MODELS_DIR, SCRIPTS_DIR
 
 # Add scripts directory to path to import gpt_download
-scripts_dir = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(scripts_dir))
+sys.path.insert(0, str(SCRIPTS_DIR))
 from gpt_download import download_and_load_gpt2
 
 # Init torch and tokenizer
@@ -19,9 +19,7 @@ torch.manual_seed(123)
 tokenizer = tiktoken.get_encoding("gpt2")
 
 # Load GPT-2 model from OpenAI
-project_root = Path(__file__).resolve().parents[2]
-model_dir = project_root / "models"
-model_path = model_dir / "gpt2"
+model_path = MODELS_DIR / "gpt2"
 settings, params = download_and_load_gpt2("124M", model_path)
 
 # Init GPT model
