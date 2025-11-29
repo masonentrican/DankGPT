@@ -78,7 +78,14 @@ def generate_and_print_sample(model, tokenizer, device, start_context):
     context_size = model.emb.pos_emb.weight.shape[0]
     encoded = text_to_token_ids(start_context, tokenizer).to(device)
     with torch.no_grad():
-        token_ids = generate_text(model, encoded, max_new_tokens=50, context_size=context_size)
+        token_ids = generate_text(
+            model,
+            encoded,
+            max_new_tokens=15,
+            context_size=context_size,
+            top_k=25,
+            temperature=1.4
+        )
     decoded_text = token_ids_to_text(token_ids, tokenizer)
     print(decoded_text.replace("\n", " "))
     model.train()
