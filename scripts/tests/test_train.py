@@ -2,7 +2,7 @@ import torch
 import tiktoken
 from pathlib import Path
 
-from llm.config import SMOOTHBRAIN
+from config.models import SMOOTHBRAIN
 from llm.data.loader import create_dataloader
 from llm.models.gptmodel import GPTModel
 from llm.training import train_model_simple
@@ -22,7 +22,7 @@ def main():
     # Training parameters
     start_context = "Every effort moves you"
     train_ratio = 0.90
-    num_epochs = 10
+    num_epochs = 1
     batch_size = 8
     max_length = 4
     stride = 4

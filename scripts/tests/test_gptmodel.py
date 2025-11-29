@@ -1,6 +1,6 @@
 import torch
 import tiktoken
-from llm.config import GPT2_SMALL
+from config.models import GPT2_SMALL
 from llm.models.gptmodel import GPTModel
 
 

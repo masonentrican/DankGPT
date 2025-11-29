@@ -1,6 +1,6 @@
 import torch
 
-from llm.config import GPT2_SMALL
+from config.models import GPT2_SMALL
 from llm.models.transformer import Transformer
 
 torch.manual_seed(123)

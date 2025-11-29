@@ -1,11 +1,11 @@
 """
-Unified configuration file for GPT-2 model variants.
+Model configuration dictionaries for GPT-2 variants.
 
-All model configurations are available directly:
-    from llm.config import GPT2_SMALL, GPT2_MEDIUM, GPT2_LARGE, GPT2_XLARGE
+Import configurations like:
+    from config.models import GPT2_SMALL, GPT2_MEDIUM, GPT2_LARGE, GPT2_XLARGE, SMOOTHBRAIN
 """
 
-# GPT-2 Small (124M parameters)
+# GPT-2 Small with reduced context for fast iteration
 SMOOTHBRAIN = {
     "vocab_size": 50257,      # Vocabulary size
     "context_length": 256,   # Context length
@@ -27,7 +27,7 @@ GPT2_SMALL = {
     "qkv_bias": False         # Query-Key-Value bias
 }
 
-# GPT-2 Medium (350M parameters)
+# GPT-2 Medium (355M parameters)
 GPT2_MEDIUM = {
     "vocab_size": 50257,      # Vocabulary size
     "context_length": 1024,   # Context length
@@ -49,7 +49,7 @@ GPT2_LARGE = {
     "qkv_bias": False         # Query-Key-Value bias
 }
 
-# GPT-2 Extra Large (1.5B parameters)
+# GPT-2 Extra Large (1558M parameters)
 GPT2_XLARGE = {
     "vocab_size": 50257,      # Vocabulary size
     "context_length": 1024,   # Context length
@@ -60,10 +60,3 @@ GPT2_XLARGE = {
     "qkv_bias": False         # Query-Key-Value bias
 }
 
-__all__ = [
-    "SMOOTHBRAIN",
-    "GPT2_SMALL",
-    "GPT2_MEDIUM",
-    "GPT2_LARGE",
-    "GPT2_XLARGE",
-]

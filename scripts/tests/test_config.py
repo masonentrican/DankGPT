@@ -2,7 +2,7 @@
 Test script to demonstrate loading and using model configurations.
 """
 
-from llm.config import GPT2_SMALL, GPT2_MEDIUM, GPT2_LARGE, GPT2_XLARGE
+from config.models import GPT2_SMALL, GPT2_MEDIUM, GPT2_LARGE, GPT2_XLARGE
 
 def main():
     print("Available configs: GPT2_SMALL, GPT2_MEDIUM, GPT2_LARGE, GPT2_XLARGE")

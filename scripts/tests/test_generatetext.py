@@ -1,7 +1,7 @@
 import torch
 from llm.generation.generator import generate_text
 from llm.utils.tokenization import text_to_token_ids, token_ids_to_text
-from llm.config import SMOOTHBRAIN, GPT2_SMALL
+from config.models import SMOOTHBRAIN, GPT2_SMALL
 from llm.models.gptmodel import GPTModel
 import tiktoken
 
