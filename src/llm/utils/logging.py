@@ -13,7 +13,7 @@ from config.logging import setup_logging as setup_logging_config
 
 def setup_logging(config_path: Optional[Path] = None) -> None:
     """
-    Set up logging configuration for the application.
+    Set up logging configuration.
     
     This is a convenience wrapper around config.logging.setup_logging that
     provides the same interface as before but now uses JSON configuration.

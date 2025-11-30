@@ -2,7 +2,7 @@
 Logging configuration module.
 
 JSON-based logging configuration with environment variable override support.
-Uses Python's logging.config.dictConfig format for verbose configuration.
+Uses Python's logging.config.dictConfig format.
 """
 
 import json
