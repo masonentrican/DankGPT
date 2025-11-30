@@ -4,16 +4,15 @@
   "incremental": false,
   "formatters": {
     "standard": {
-      "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-      "datefmt": "%Y-%m-%d %H:%M:%S"
+      "()": "config.logging.DateTimeFormatter",
+      "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     },
     "detailed": {
-      "format": "%(asctime)s - %(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(funcName)s() - %(message)s",
-      "datefmt": "%Y-%m-%d %H:%M:%S"
+      "()": "config.logging.DateTimeFormatter",
+      "format": "%(asctime)s - %(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(funcName)s() - %(message)s"
     },
     "minimal": {
-      "format": "%(levelname)s - %(message)s",
-      "datefmt": ""
+      "format": "%(levelname)s - %(message)s"
     }
   },
   "filters": {},

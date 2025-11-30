@@ -7,11 +7,21 @@ Uses Python's logging.config.dictConfig format.
 
 import json
 import os
+import logging
 import logging.config
+from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
 
 from config.paths import PROJECT_ROOT, LOGS_DIR
+
+
+class DateTimeFormatter(logging.Formatter):
+    """Formatter that outputs timestamps in ISO 8601 format with milliseconds and timezone."""
+    
+    def formatTime(self, record, datefmt=None):
+        dt = datetime.fromtimestamp(record.created).astimezone()
+        return dt.strftime("%Y-%m-%dT%H:%M:%S") + f".{int(record.msecs):03d}" + dt.strftime("%z")
 
 
 def _load_json_config(config_path: Path) -> Dict[str, Any]:
