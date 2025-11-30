@@ -8,35 +8,22 @@ class GPTDataset(Dataset):
     Handles tokenization with tiktoken Byte Pair Encoding
     Handles windowing of chunk sequences.
     """
+    def __init__(self, txt, tokenizer, max_length, stride):
+        self.input_ids = []
+        self.target_ids = []
 
-    def __init__(self,
-                 text: str,
-                 tokenizer: tiktoken.Encoding,
-                 max_length: int,
-                 stride: int):
+        # Tokenize the entire text
+        token_ids = tokenizer.encode(txt, allowed_special={"<|endoftext|>"})
 
-        self.tokenizer = tokenizer
-        self.max_length = max_length
-        self.stride = stride or max_length # Non-overlapping chunks by default
-
-        # Tokenize text content
-        self.tokens = tokenizer.encode(text)
-        self.num_tokens = len(self.tokens)
-
-        # Pre compute how many windows fit
-        self.num_windows = (self.num_tokens - max_length) // self.stride
+        # Use a sliding window to chunk the text into overlapping sequences of max_length
+        for i in range(0, len(token_ids) - max_length, stride):
+            input_chunk = token_ids[i:i + max_length]
+            target_chunk = token_ids[i + 1: i + max_length + 1]
+            self.input_ids.append(torch.tensor(input_chunk))
+            self.target_ids.append(torch.tensor(target_chunk))
 
     def __len__(self):
-        return self.num_windows
+        return len(self.input_ids)
 
     def __getitem__(self, idx):
-        start = idx * self.stride
-        end = start + self.max_length
-
-        x = self.tokens[start:end]
-        y = self.tokens[start+1:end+1]
-
-        return (
-            torch.tensor(x, dtype=torch.long),
-            torch.tensor(y, dtype=torch.long)
-        ) 
+        return self.input_ids[idx], self.target_ids[idx]
