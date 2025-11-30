@@ -5,7 +5,7 @@ from config.paths import DATA_DIR, MODELS_DIR
 from llm.data.loader import create_dataloader
 from llm.models.gptmodel import GPTModel
 from llm.training import train_model_simple
-from llm.utils import get_device, get_tokenizer
+from llm.utils import get_device, get_tokenizer, load_checkpoint, save_checkpoint
 from llm.utils.plot import plot_losses
 
 def main():
@@ -47,21 +47,20 @@ def main():
     tokenizer = get_tokenizer()
     device = get_device("auto")
 
+    # Initialize model and optimizer
+    model = GPTModel(cfg)
+    model.to(device)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=0.0004, weight_decay=0.1)
+
     if model_file.exists():
         # Load existing checkpoint
-        print(f"Loading checkpoint from {model_file}")
-        checkpoint = torch.load(model_file)
-        model = GPTModel(cfg)
-        model.load_state_dict(checkpoint["model_state_dict"])
-        model.to(device)
-        optimizer = torch.optim.AdamW(model.parameters(), lr=0.0004, weight_decay=0.1)
-        optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+        try:
+            metadata = load_checkpoint(model_file, model, optimizer, device)
+            print(f"Resumed from checkpoint. Epoch: {metadata.get('epoch', 'N/A')}, Loss: {metadata.get('loss', 'N/A')}")
+        except Exception as e:
+            print(f"Error loading checkpoint: {e}. Starting fresh.")
     else:
-        # Initialize fresh model and optimizer
         print(f"No checkpoint found at {model_file}, starting fresh")
-        model = GPTModel(cfg)
-        model.to(device)
-        optimizer = torch.optim.AdamW(model.parameters(), lr=0.0004, weight_decay=0.1)
 
     # ============================================================================
     # Dataset statistics
@@ -101,16 +100,18 @@ def main():
     # ============================================================================
     # Save the model
     # ============================================================================
-    model_dir.mkdir(exist_ok=True)
     model_path = model_dir / "model_and_optimizer.pth"
     
-    torch.save({
-        "model_state_dict": model.state_dict(),
-        "optimizer_state_dict": optimizer.state_dict(),
-        }, 
-        model_path
+    # Get final loss for saving
+    final_val_loss = val_losses[-1] if val_losses else None
+    
+    save_checkpoint(
+        model=model,
+        filepath=model_path,
+        optimizer=optimizer,
+        epoch=num_epochs,
+        loss=final_val_loss,
     )
-    print(f"Saved model and optimizer to {model_path}")
 
     # ============================================================================
     # Plot losses
