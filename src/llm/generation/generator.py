@@ -75,7 +75,7 @@ def generate_and_print_sample(model, tokenizer, device, start_context):
         start_context: Starting text context for generation.
     """
     model.eval()  # Disable dropout and batch normalization
-    context_size = model.emb.pos_emb.weight.shape[0]
+    context_size = model.context_length
     encoded = text_to_token_ids(start_context, tokenizer).to(device)
     with torch.no_grad():
         token_ids = generate_text(
