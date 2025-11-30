@@ -2,6 +2,7 @@ import torch
 
 from config.models import SMOOTHBRAIN
 from config.paths import DATA_DIR, MODELS_DIR
+from config.training import QUICK
 from llm import (
     GPTModel,
     create_dataloader,
@@ -22,15 +23,8 @@ def main():
     # Configuration
     # ============================================================================
     torch.manual_seed(123)
-    cfg = SMOOTHBRAIN
-    
-    # Training parameters
-    start_context = "Every effort moves you"
-    train_ratio = 0.90
-    num_epochs = 1
-    batch_size = 8
-    max_length = 4
-    stride = 4
+    model_cfg = SMOOTHBRAIN
+    train_cfg = QUICK.copy()  # Use training config, can be modified if needed
 
     # ============================================================================
     # IO Bootstrap
@@ -53,9 +47,13 @@ def main():
     device = get_device("auto")
 
     # Initialize model and optimizer
-    model = GPTModel(cfg)
+    model = GPTModel(model_cfg)
     model.to(device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=0.0004, weight_decay=0.1)
+    optimizer = torch.optim.AdamW(
+        model.parameters(),
+        lr=train_cfg["learning_rate"],
+        weight_decay=train_cfg["weight_decay"]
+    )
 
     if model_file.exists():
         # Load existing checkpoint
@@ -78,28 +76,41 @@ def main():
     # ============================================================================
     # Split data into training and validation sets
     # ============================================================================
+    train_ratio = train_cfg["train_ratio"]
     split_idx = int(train_ratio * len(text_data))
     train_data = text_data[:split_idx]
     val_data = text_data[split_idx:]
 
     # ============================================================================
-    # Configure training parameters
+    # Create data loaders
     # ============================================================================
-    # Number of complete passes through the training dataset
-    print(f"INPUT: {start_context}")
-    train_loader = create_dataloader(train_data, batch_size=batch_size, max_length=max_length, stride=stride)
-    val_loader = create_dataloader(val_data, batch_size=batch_size, max_length=max_length, stride=stride)
+    print(f"INPUT: {train_cfg['start_context']}")
+    train_loader = create_dataloader(
+        train_data,
+        batch_size=train_cfg["batch_size"],
+        max_length=train_cfg["max_length"],
+        stride=train_cfg["stride"],
+        shuffle=train_cfg.get("shuffle", True),
+        drop_last=train_cfg.get("drop_last", True),
+        num_workers=train_cfg.get("num_workers", 0),
+    )
+    val_loader = create_dataloader(
+        val_data,
+        batch_size=train_cfg["batch_size"],
+        max_length=train_cfg["max_length"],
+        stride=train_cfg["stride"],
+        shuffle=False,  # Don't shuffle validation
+        drop_last=False,  # Don't drop last batch in validation
+        num_workers=train_cfg.get("num_workers", 0),
+    )
 
     # ============================================================================
     # Execute training loop
     # ============================================================================
     # Train the model: forward pass, compute loss, backpropagate, update weights
-    # eval_freq=5: run validation every 5 training iterations
-    # eval_iter=5: perform 5 validation iterations when evaluating
     # Returns loss history and token count for monitoring training progress
     train_losses, val_losses, tokens_seen = train_model_simple(
-        model, train_loader, val_loader, optimizer, device, num_epochs, 
-        eval_freq=5, eval_iter=5, start_context=start_context, tokenizer=tokenizer
+        model, train_loader, val_loader, optimizer, device, train_cfg, tokenizer
     )
 
     # ============================================================================
@@ -114,14 +125,14 @@ def main():
         model=model,
         filepath=model_path,
         optimizer=optimizer,
-        epoch=num_epochs,
+        epoch=train_cfg["num_epochs"],
         loss=final_val_loss,
     )
 
     # ============================================================================
     # Plot losses
     # ============================================================================    
-    epochs_tensor = torch.linspace(0, num_epochs, len(train_losses))
+    epochs_tensor = torch.linspace(0, train_cfg["num_epochs"], len(train_losses))
     plot_losses("training_losses.png", epochs_tensor, tokens_seen, train_losses, val_losses)
 
 if __name__ == "__main__":

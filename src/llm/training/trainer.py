@@ -3,8 +3,12 @@ Training and evaluation utilities for GPT models.
 """
 
 import torch
+from typing import TYPE_CHECKING
 
 from llm.generation import generate_and_print_sample
+
+if TYPE_CHECKING:
+    from config.training import TrainingConfig
 
 
 def calc_loss_batch(input_batch, target_batch, model, device):
@@ -77,7 +81,15 @@ def evaluate_model(model, train_loader, val_loader, device, eval_iter):
     return train_loss, val_loss
 
 
-def train_model_simple(model, train_loader, val_loader, optimizer, device, num_epochs, eval_freq, eval_iter, start_context, tokenizer):
+def train_model_simple(
+    model,
+    train_loader,
+    val_loader,
+    optimizer,
+    device,
+    train_config: "TrainingConfig",
+    tokenizer,
+):
     """
     Simple training loop for GPT model.
 
@@ -87,15 +99,18 @@ def train_model_simple(model, train_loader, val_loader, optimizer, device, num_e
         val_loader: DataLoader for validation data.
         optimizer: Optimizer instance.
         device: Device to run training on.
-        num_epochs: Number of training epochs.
-        eval_freq: Frequency of evaluation (every N steps).
-        eval_iter: Number of batches to evaluate on.
-        start_context: Starting context for text generation samples.
+        train_config: Training configuration dictionary.
         tokenizer: Tokenizer object.
 
     Returns:
         tuple: (train_losses, val_losses, track_tokens_seen)
     """
+    # Extract parameters from config
+    num_epochs = train_config.get("num_epochs", 1)
+    eval_freq = train_config.get("eval_freq", 100)
+    eval_iter = train_config.get("eval_iter", 50)
+    start_context = train_config.get("start_context", "")
+    
     train_losses, val_losses, track_tokens_seen = [], [], []  # Track losses
     tokens_seen, global_step = 0, -1  # Track tokens seen and global step
 
@@ -122,7 +137,8 @@ def train_model_simple(model, train_loader, val_loader, optimizer, device, num_e
                 f"Tokens seen: {tokens_seen:08d}")
     
         # Gen and print per Epoch - NOT step
-        generate_and_print_sample(model, tokenizer, device, start_context)
+        if start_context:
+            generate_and_print_sample(model, tokenizer, device, start_context)
 
     return train_losses, val_losses, track_tokens_seen
 
