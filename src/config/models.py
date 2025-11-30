@@ -35,7 +35,7 @@ GPT2_MEDIUM = {
     "num_heads": 16,          # Number of attention heads
     "num_layers": 24,         # Number of layers
     "drop_rate": 0.1,         # Dropout rate
-    "qkv_bias": False         # Query-Key-Value bias
+    "qkv_bias": True         # Query-Key-Value bias
 }
 
 # GPT-2 Large (774M parameters)
@@ -46,7 +46,7 @@ GPT2_LARGE = {
     "num_heads": 20,          # Number of attention heads
     "num_layers": 36,         # Number of layers
     "drop_rate": 0.1,         # Dropout rate
-    "qkv_bias": False         # Query-Key-Value bias
+    "qkv_bias": True         # Query-Key-Value bias
 }
 
 # GPT-2 Extra Large (1558M parameters)
@@ -57,6 +57,6 @@ GPT2_XLARGE = {
     "num_heads": 25,          # Number of attention heads
     "num_layers": 48,         # Number of layers
     "drop_rate": 0.1,         # Dropout rate
-    "qkv_bias": False         # Query-Key-Value bias
+    "qkv_bias": True         # Query-Key-Value bias
 }
 
