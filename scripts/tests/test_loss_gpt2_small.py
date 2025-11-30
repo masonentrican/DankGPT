@@ -5,7 +5,7 @@ from llm.data.loader import create_dataloader
 from llm.models.gptmodel import GPTModel
 from config.paths import DATA_DIR, MODELS_DIR, SCRIPTS_DIR
 from llm.training import calc_loss_load
-from llm.utils import get_tokenizer
+from llm.utils import get_device, get_tokenizer
 from llm.utils.weights import load_openai_weights_into_gpt
 
 # Add scripts directory to path to import gpt_download
@@ -28,7 +28,7 @@ def main():
     # Initialize GPT model
     gpt = GPTModel(GPT2_SMALL)
     gpt.eval()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = get_device("auto")
 
     # Load OpenAI weights into GPT model
     load_openai_weights_into_gpt(gpt, params)

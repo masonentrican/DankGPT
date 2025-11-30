@@ -2,7 +2,7 @@ import argparse
 import sys
 
 import torch
-from llm.utils import get_tokenizer
+from llm.utils import get_device, get_tokenizer
 from llm.utils.weights import load_openai_weights_into_gpt
 from llm.utils.tokenization import text_to_token_ids, token_ids_to_text
 from llm.generation.generator import generate_text
@@ -42,8 +42,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate text with a pretrained GPT-2 model.")
     parser.add_argument(
         "--device",
-        default="cuda",
-        help="Device for running inference, e.g., cpu, cuda, mps, or auto. Defaults to cpu."
+        default="auto",
+        help="Device for running inference, e.g., cpu, cuda, mps, or auto. Defaults to auto."
     )
 
     args = parser.parse_args()
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     torch.manual_seed(123)
 
     INPUT_PROMPT = input("Enter your prompt: ")
-    DEVICE = torch.device(args.device)
+    DEVICE = get_device(args.device)
 
     print("PyTorch:", torch.__version__)
     print("Device:", DEVICE)

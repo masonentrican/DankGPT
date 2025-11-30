@@ -5,7 +5,7 @@ from config.paths import DATA_DIR, MODELS_DIR
 from llm.data.loader import create_dataloader
 from llm.models.gptmodel import GPTModel
 from llm.training import train_model_simple
-from llm.utils import get_tokenizer
+from llm.utils import get_device, get_tokenizer
 from llm.utils.plot import plot_losses
 
 def main():
@@ -45,7 +45,7 @@ def main():
     # ============================================================================
 
     tokenizer = get_tokenizer()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = get_device("auto")
 
     if model_file.exists():
         # Load existing checkpoint
