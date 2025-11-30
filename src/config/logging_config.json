@@ -5,14 +5,11 @@
   "formatters": {
     "standard": {
       "()": "config.logging.DateTimeFormatter",
-      "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+      "format": "%(levelname)-8s[%(module)s:%(lineno)d] %(message)s"
     },
     "detailed": {
       "()": "config.logging.DateTimeFormatter",
-      "format": "%(asctime)s - %(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(funcName)s() - %(message)s"
-    },
-    "minimal": {
-      "format": "%(levelname)s - %(message)s"
+      "format": "%(asctime)s %(levelname)-8s[%(filename)s:%(funcName)s():%(lineno)d] - %(message)s"
     }
   },
   "filters": {},
@@ -24,32 +21,16 @@
       "stream": "ext://sys.stdout",
       "filters": []
     },
-    "console_debug": {
-      "class": "logging.StreamHandler",
-      "level": "DEBUG",
-      "formatter": "detailed",
-      "stream": "ext://sys.stderr",
-      "filters": []
-    },
     "file": {
-      "class": "logging.FileHandler",
-      "level": "DEBUG",
-      "formatter": "standard",
-      "filename": "logs/app.log",
-      "mode": "a",
-      "encoding": "utf-8",
-      "delay": false,
-      "filters": []
-    },
-    "file_rotating": {
       "class": "logging.handlers.RotatingFileHandler",
       "level": "DEBUG",
       "formatter": "detailed",
-      "filename": "logs/app_detailed.log",
+      "filename": "app.log",
       "mode": "a",
       "encoding": "utf-8",
       "maxBytes": 10485760,
       "backupCount": 5,
+      "delay": false,
       "filters": []
     }
   },
