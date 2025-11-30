@@ -1,11 +1,8 @@
 import sys
 import torch
 from config.models import GPT2_SMALL
-from llm.data.loader import create_dataloader
-from llm.models.gptmodel import GPTModel
 from config.paths import DATA_DIR, MODELS_DIR, SCRIPTS_DIR
-from llm.training import calc_loss_load
-from llm.utils import get_device, get_tokenizer
+from llm import GPTModel, calc_loss_load, create_dataloader, get_device, get_tokenizer
 from llm.utils.weights import load_openai_weights_into_gpt
 
 # Add scripts directory to path to import gpt_download

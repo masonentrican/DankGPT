@@ -1,11 +1,9 @@
 import torch
 import sys
 from pathlib import Path
-from llm.utils import get_device, get_tokenizer
-from llm.generation.generator import generate_text
+from llm import GPTModel, generate_text, get_device, get_tokenizer
 from llm.utils.tokenization import text_to_token_ids, token_ids_to_text
 from llm.utils.weights import load_openai_weights_into_gpt
-from llm.models.gptmodel import GPTModel
 from config.models import GPT2_SMALL
 from config.paths import PROJECT_ROOT, MODELS_DIR, SCRIPTS_DIR
 

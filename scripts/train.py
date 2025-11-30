@@ -2,10 +2,9 @@ import torch
 from torch.nn import Embedding
 from torch.utils.data import DataLoader
 
-from llm.data.dataset import GPTDataset
+from llm import GPTDataset, get_tokenizer
 from llm.models.selfattention import SelfAttention
 from config.paths import DATA_DIR
-from llm.utils import get_tokenizer
 
 # -------------------------------------------------------------------
 # Config

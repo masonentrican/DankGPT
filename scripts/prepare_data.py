@@ -1,5 +1,5 @@
 from config.paths import DATA_DIR
-from llm.data.importer import download_text
+from llm import download_text
 
 RAW_DIR = DATA_DIR / "raw"
 URL = "https://raw.githubusercontent.com/rasbt/LLMs-from-scratch/refs/heads/main/ch02/01_main-chapter-code/the-verdict.txt"

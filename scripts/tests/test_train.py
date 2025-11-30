@@ -2,10 +2,15 @@ import torch
 
 from config.models import SMOOTHBRAIN
 from config.paths import DATA_DIR, MODELS_DIR
-from llm.data.loader import create_dataloader
-from llm.models.gptmodel import GPTModel
-from llm.training import train_model_simple
-from llm.utils import get_device, get_tokenizer, load_checkpoint, save_checkpoint
+from llm import (
+    GPTModel,
+    create_dataloader,
+    get_device,
+    get_tokenizer,
+    load_checkpoint,
+    save_checkpoint,
+    train_model_simple,
+)
 from llm.utils.plot import plot_losses
 
 def main():

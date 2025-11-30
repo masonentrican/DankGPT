@@ -1,7 +1,6 @@
 import torch
 from config.models import GPT2_SMALL
-from llm.models.gptmodel import GPTModel
-from llm.utils import get_tokenizer
+from llm import GPTModel, get_tokenizer
 
 
 # Prepare batch
