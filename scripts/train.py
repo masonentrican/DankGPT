@@ -1,4 +1,3 @@
-import tiktoken
 import torch
 from torch.nn import Embedding
 from torch.utils.data import DataLoader
@@ -6,6 +5,7 @@ from torch.utils.data import DataLoader
 from llm.data.dataset import GPTDataset
 from llm.models.selfattention import SelfAttention
 from config.paths import DATA_DIR
+from llm.utils import get_tokenizer
 
 # -------------------------------------------------------------------
 # Config
@@ -44,7 +44,7 @@ def create_dataloader(
     Returns:
         torch.utils.data.DataLoader
     """
-    tokenizer = tiktoken.get_encoding("gpt2")
+    tokenizer = get_tokenizer()
     dataset = GPTDataset(text, tokenizer, max_length, stride)
     dataloader = DataLoader(
         dataset,

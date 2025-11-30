@@ -1,11 +1,11 @@
 import sys
-import tiktoken
 import torch
 from config.models import GPT2_SMALL
 from llm.data.loader import create_dataloader
 from llm.models.gptmodel import GPTModel
 from config.paths import DATA_DIR, MODELS_DIR, SCRIPTS_DIR
 from llm.training import calc_loss_load
+from llm.utils import get_tokenizer
 from llm.utils.weights import load_openai_weights_into_gpt
 
 # Add scripts directory to path to import gpt_download
@@ -19,7 +19,7 @@ def main():
 
     # Set seed and initialize tokenizer
     torch.manual_seed(123)
-    tokenizer = tiktoken.get_encoding("gpt2")
+    tokenizer = get_tokenizer()
 
     # Load GPT-2 model params from OpenAI
     model_path = MODELS_DIR / "gpt2"

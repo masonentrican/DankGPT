@@ -1,11 +1,11 @@
 import torch
-import tiktoken
 from config.models import GPT2_SMALL
 from llm.models.gptmodel import GPTModel
+from llm.utils import get_tokenizer
 
 
 # Prepare batch
-tokenizer = tiktoken.get_encoding("gpt2")
+tokenizer = get_tokenizer()
 batch = []
 txt1 = "Every effort moves you"
 txt2 = "Every day holds a"

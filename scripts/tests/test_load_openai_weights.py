@@ -1,7 +1,7 @@
-import tiktoken
 import torch
 import sys
 from pathlib import Path
+from llm.utils import get_tokenizer
 from llm.generation.generator import generate_text
 from llm.utils.tokenization import text_to_token_ids, token_ids_to_text
 from llm.utils.weights import load_openai_weights_into_gpt
@@ -16,7 +16,7 @@ from gpt_download import download_and_load_gpt2
 # Init torch and tokenizer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(123)
-tokenizer = tiktoken.get_encoding("gpt2")
+tokenizer = get_tokenizer()
 
 # Load GPT-2 model from OpenAI
 model_path = MODELS_DIR / "gpt2"

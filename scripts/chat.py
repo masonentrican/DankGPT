@@ -1,8 +1,8 @@
 import argparse
 import sys
 
-import tiktoken
 import torch
+from llm.utils import get_tokenizer
 from llm.utils.weights import load_openai_weights_into_gpt
 from llm.utils.tokenization import text_to_token_ids, token_ids_to_text
 from llm.generation.generator import generate_text
@@ -23,7 +23,7 @@ def main(gpt_config, input_prompt, model_size, device):
     gpt.to(device)
     gpt.eval()
 
-    tokenizer = tiktoken.get_encoding("gpt2")
+    tokenizer = get_tokenizer()
     torch.manual_seed(123)
 
     token_ids = generate_text(

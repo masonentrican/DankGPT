@@ -1,9 +1,9 @@
 import torch
 from llm.generation.generator import generate_text
+from llm.utils import get_tokenizer
 from llm.utils.tokenization import text_to_token_ids, token_ids_to_text
 from config.models import SMOOTHBRAIN, GPT2_SMALL
 from llm.models.gptmodel import GPTModel
-import tiktoken
 
 def main():
     """
@@ -13,7 +13,7 @@ def main():
     model = GPTModel(GPT2_SMALL)
     model.to("cpu")
     model.eval()
-    tokenizer = tiktoken.get_encoding("gpt2")
+    tokenizer = get_tokenizer()
 
     token_ids = generate_text(
         model=model,

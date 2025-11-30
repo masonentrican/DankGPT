@@ -1,11 +1,11 @@
 import torch
-import tiktoken
 
 from config.models import SMOOTHBRAIN
 from config.paths import DATA_DIR, MODELS_DIR
 from llm.data.loader import create_dataloader
 from llm.models.gptmodel import GPTModel
 from llm.training import train_model_simple
+from llm.utils import get_tokenizer
 from llm.utils.plot import plot_losses
 
 def main():
@@ -44,7 +44,7 @@ def main():
     # Start from previous model checkpoint if it exists, otherwise start fresh
     # ============================================================================
 
-    tokenizer = tiktoken.get_encoding("gpt2")
+    tokenizer = get_tokenizer()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     if model_file.exists():

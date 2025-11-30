@@ -1,10 +1,10 @@
 import torch
-import tiktoken
 from llm.models.normalization import Normalization
+from llm.utils import get_tokenizer
 
 
 # Prepare batch (two training examples with 5 dimensions)
-tokenizer = tiktoken.get_encoding("gpt2")
+tokenizer = get_tokenizer()
 emb_dim = 5
 batch = torch.randn(2, emb_dim)
 
