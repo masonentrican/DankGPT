@@ -33,10 +33,29 @@ Downloads GPT-2 124M weights from OpenAI into `models/gpt2/`.
 ## Train Model
 
 ```bash
-python scripts/train.py
+python scripts/tests/test_train.py
 ```
 
-Runs a small GPT-style model on the prepared dataset.
+Trains a small GPT-style model on the prepared dataset with checkpoint saving/loading.
+
+## Testing
+
+Run the full test suite:
+
+```bash
+python scripts/perform_tests.py
+```
+
+This executes all tests in `scripts/tests/` and provides a summary. Available test categories:
+
+- **Model Components**: Attention mechanisms (causal, multi-head, self-attention), transformer blocks, normalization layers, GPT model architecture
+- **Activation Functions**: GELU vs ReLU comparisons
+- **Text Generation**: Generation with temperature scaling and top-k sampling
+- **Training**: Full training loop, loss calculation, checkpoint saving/loading
+- **Integration**: Loading OpenAI GPT-2 weights, model size validation
+- **Configuration**: Model configuration validation
+
+Individual tests can be run directly, e.g., `python scripts/tests/test_gptmodel.py`.
 
 ## Project Structure
 
