@@ -8,5 +8,8 @@ Import training configurations from the training module:
     from config.training import QUICK_TEST, STANDARD, LONG_TRAIN, TrainingConfig
 
 Import project paths:
-    from config.paths import PROJECT_ROOT, MODELS_DIR, DATA_DIR, SCRIPTS_DIR
+    from config.paths import PROJECT_ROOT, MODELS_DIR, DATA_DIR, SCRIPTS_DIR, LOGS_DIR
+
+Import logging setup from the logging module:
+    from config.logging import setup_logging, get_logging_config
 """

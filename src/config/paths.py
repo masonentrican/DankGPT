@@ -41,4 +41,5 @@ PROJECT_ROOT = _find_project_root(Path(__file__))
 MODELS_DIR = PROJECT_ROOT / "models"
 DATA_DIR = PROJECT_ROOT / "data"
 SCRIPTS_DIR = PROJECT_ROOT / "scripts"
+LOGS_DIR = PROJECT_ROOT / "logs"
 

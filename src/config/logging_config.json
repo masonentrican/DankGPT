@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+  "incremental": false,
+  "formatters": {
+    "standard": {
+      "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+      "datefmt": "%Y-%m-%d %H:%M:%S"
+    },
+    "detailed": {
+      "format": "%(asctime)s - %(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(funcName)s() - %(message)s",
+      "datefmt": "%Y-%m-%d %H:%M:%S"
+    },
+    "minimal": {
+      "format": "%(levelname)s - %(message)s",
+      "datefmt": ""
+    }
+  },
+  "filters": {},
+  "handlers": {
+    "console": {
+      "class": "logging.StreamHandler",
+      "level": "INFO",
+      "formatter": "standard",
+      "stream": "ext://sys.stdout",
+      "filters": []
+    },
+    "console_debug": {
+      "class": "logging.StreamHandler",
+      "level": "DEBUG",
+      "formatter": "detailed",
+      "stream": "ext://sys.stderr",
+      "filters": []
+    },
+    "file": {
+      "class": "logging.FileHandler",
+      "level": "DEBUG",
+      "formatter": "standard",
+      "filename": "logs/app.log",
+      "mode": "a",
+      "encoding": "utf-8",
+      "delay": false,
+      "filters": []
+    },
+    "file_rotating": {
+      "class": "logging.handlers.RotatingFileHandler",
+      "level": "DEBUG",
+      "formatter": "detailed",
+      "filename": "logs/app_detailed.log",
+      "mode": "a",
+      "encoding": "utf-8",
+      "maxBytes": 10485760,
+      "backupCount": 5,
+      "filters": []
+    }
+  },
+  "loggers": {
+    "": {
+      "level": "DEBUG",
+      "handlers": ["console", "file"],
+      "propagate": false
+    },
+    "llm": {
+      "level": "DEBUG",
+      "handlers": ["console", "file"],
+      "propagate": false
+    },
+    "llm.models": {
+      "level": "DEBUG",
+      "handlers": ["file"],
+      "propagate": true
+    },
+    "llm.training": {
+      "level": "INFO",
+      "handlers": ["console", "file"],
+      "propagate": false
+    },
+    "llm.generation": {
+      "level": "INFO",
+      "handlers": ["console", "file"],
+      "propagate": false
+    }
+  },
+  "root": {
+    "level": "DEBUG",
+    "handlers": ["console", "file"]
+  }
+}
