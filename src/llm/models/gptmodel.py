@@ -35,7 +35,7 @@ class GPTModel(nn.Module):
         super().__init__()
         
         # Store config for later access
-        self.cfg = cfg
+        self._cfg = cfg
         
         # Extract and store config values with defaults (exposed as properties)
         self.vocab_size = cfg.get("vocab_size", 50257)

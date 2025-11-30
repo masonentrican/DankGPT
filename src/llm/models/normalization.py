@@ -17,7 +17,7 @@ class Normalization(nn.Module):
     def __init__(self, emb_dim):
         super().__init__()
 
-        self.eps = 1e-5 # Epsilon for numerical stability
+        self._eps = 1e-5  # Epsilon for numerical stability
         self.scale = nn.Parameter(torch.ones(emb_dim))
         self.shift = nn.Parameter(torch.zeros(emb_dim))
 
@@ -37,6 +37,6 @@ class Normalization(nn.Module):
             torch.Tensor: Output tensor.
         """
         mean = x.mean(dim=-1, keepdim=True)
-        variance = x.var(dim=-1, keepdim=True, unbiased=False) # GPT2's model uses unbiased=False
-        norm_x = (x - mean) / torch.sqrt(variance + self.eps)
+        variance = x.var(dim=-1, keepdim=True, unbiased=False)  # GPT2's model uses unbiased=False
+        norm_x = (x - mean) / torch.sqrt(variance + self._eps)
         return self.scale * norm_x + self.shift

@@ -29,9 +29,9 @@ class MultiHeadAttention(nn.Module):
         super().__init__()
         assert dim_out % num_heads == 0, "dim_out must be divisible by num_heads"
 
-        self.dim_out = dim_out
-        self.num_heads = num_heads
-        self.head_dim = dim_out // num_heads # Dimension per head (dim_out divided among heads)
+        self._dim_out = dim_out
+        self._num_heads = num_heads
+        self._head_dim = dim_out // num_heads  # Dimension per head (dim_out divided among heads)
         self.weight_query = nn.Linear(dim_in, dim_out, bias=qkv_bias)
         self.weight_key = nn.Linear(dim_in, dim_out, bias=qkv_bias)
         self.weight_value = nn.Linear(dim_in, dim_out, bias=qkv_bias)
@@ -68,9 +68,9 @@ class MultiHeadAttention(nn.Module):
         
         # Split dim_out into num_heads and head_dim by reshaping:
         # (b, num_tokens, dim_out) -> (b, num_tokens, num_heads, head_dim)
-        keys = keys.view(b, num_tokens, self.num_heads, self.head_dim)
-        values = values.view(b, num_tokens, self.num_heads, self.head_dim)
-        queries = queries.view(b, num_tokens, self.num_heads, self.head_dim)
+        keys = keys.view(b, num_tokens, self._num_heads, self._head_dim)
+        values = values.view(b, num_tokens, self._num_heads, self._head_dim)
+        queries = queries.view(b, num_tokens, self._num_heads, self._head_dim)
 
         # Transpose to move num_heads before num_tokens for batched attention computation:
         # (b, num_tokens, num_heads, head_dim) -> (b, num_heads, num_tokens, head_dim)
@@ -98,7 +98,7 @@ class MultiHeadAttention(nn.Module):
         context_vector = (attention_weights @ values).transpose(1, 2)
 
         # Reshape to combine heads: (b, num_tokens, num_heads, head_dim) -> (b, num_tokens, dim_out)
-        context_vector = context_vector.contiguous().view(b, num_tokens, self.dim_out)
+        context_vector = context_vector.contiguous().view(b, num_tokens, self._dim_out)
 
         # Final projection to output dimension
         context_vector = self.out_projection(context_vector)
@@ -150,7 +150,7 @@ class CausalAttention(nn.Module):
                 qkv_bias: bool = False):
 
         super().__init__()
-        self.dim_out = dim_out
+        self._dim_out = dim_out
         self.weight_query = nn.Linear(dim_in, dim_out)
         self.weight_key = nn.Linear(dim_in, dim_out)
         self.weight_value = nn.Linear(dim_in, dim_out)
@@ -226,8 +226,8 @@ class SelfAttention(nn.Module):
     def __init__(self, dim_in: int, dim_out: int) -> None:
 
         super().__init__()
-        self.d_in = dim_in
-        self.d_out = dim_out
+        self._d_in = dim_in
+        self._d_out = dim_out
 
         # Trainable weight matrices mapping input -> query / key / value
         self.weight_query = nn.Parameter(torch.rand(dim_in,dim_out))
