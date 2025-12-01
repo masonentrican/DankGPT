@@ -9,6 +9,7 @@ import json
 import os
 import logging
 import logging.config
+import logging.handlers
 import atexit
 from datetime import datetime
 from pathlib import Path
@@ -16,7 +17,8 @@ from typing import Optional, Dict, Any
 
 from config.paths import PROJECT_ROOT, LOGS_DIR
 
-# Module-level variable to track if listener has been started
+# Module-level variables to track logging setup state
+_logging_configured = False
 _queue_listener_started = False
 
 
@@ -186,18 +188,40 @@ def setup_logging(config_path: Optional[Path] = None) -> None:
     thread to process log records asynchronously.
     
     The function is idempotent -
-    calling it multiple times is safe and will only start the listener once.
+    calling it multiple times is safe and will only configure once.
     
     Args:
         config_path: Optional path to JSON configuration file. If not provided,
                      uses default or LOG_CONFIG environment variable.
     """
-    global _queue_listener_started
+    global _logging_configured, _queue_listener_started
+    
+    # Check if logging is already configured
+    root_logger = logging.getLogger()
+    if _logging_configured and root_logger.handlers:
+        # Check if we already have a queue handler configured
+        existing_queue_handler = None
+        for handler in root_logger.handlers:
+            if isinstance(handler, logging.handlers.QueueHandler):
+                existing_queue_handler = handler
+                break
+        
+        # If queue handler exists and listener is started, we're done
+        if existing_queue_handler is not None:
+            if hasattr(existing_queue_handler, 'listener') and existing_queue_handler.listener is not None:
+                listener_thread = getattr(existing_queue_handler.listener, '_thread', None)
+                if listener_thread and listener_thread.is_alive():
+                    return  # Already configured and running
+        
+        # If we get here, we might have handlers but no queue handler, or queue handler without listener
+        # Clear existing handlers to prevent duplicates
+        root_logger.handlers.clear()
     
     config = get_logging_config(config_path)
     
     # Apply the configuration
     logging.config.dictConfig(config)
+    _logging_configured = True
     
     # If queue handler is configured, start its listener
     # Try getHandlerByName first (Python 3.13+), fallback to searching root logger
@@ -206,7 +230,6 @@ def setup_logging(config_path: Optional[Path] = None) -> None:
         queue_handler = logging.getHandlerByName("queue_handler")
     except AttributeError:
         # Fallback: search root logger's handlers
-        root_logger = logging.getLogger()
         for handler in root_logger.handlers:
             if isinstance(handler, logging.handlers.QueueHandler):
                 queue_handler = handler
@@ -214,7 +237,10 @@ def setup_logging(config_path: Optional[Path] = None) -> None:
     
     if queue_handler is not None and not _queue_listener_started:
         if hasattr(queue_handler, 'listener') and queue_handler.listener is not None:
-            queue_handler.listener.start()
-            # Register cleanup on exit
-            atexit.register(queue_handler.listener.stop)
-            _queue_listener_started = True
+            listener_thread = getattr(queue_handler.listener, '_thread', None)
+            # Only start if not already started
+            if listener_thread is None or not listener_thread.is_alive():
+                queue_handler.listener.start()
+                # Register cleanup on exit
+                atexit.register(queue_handler.listener.stop)
+                _queue_listener_started = True
