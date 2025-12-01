@@ -5,6 +5,9 @@ Text generation utilities for GPT models.
 import torch
 
 from llm.utils.tokenization import text_to_token_ids, token_ids_to_text
+from llm.utils.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 def generate_text(model, idx, max_new_tokens, context_size, temperature=0.0, top_k=None, eos_id=None):
@@ -87,6 +90,6 @@ def generate_and_print_sample(model, tokenizer, device, start_context):
             temperature=1.4
         )
     decoded_text = token_ids_to_text(token_ids, tokenizer)
-    print(decoded_text.replace("\n", " "))
+    logger.info(decoded_text.replace("\n", " "))
     model.train()
 

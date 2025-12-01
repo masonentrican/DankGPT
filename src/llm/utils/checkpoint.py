@@ -8,6 +8,10 @@ import torch
 from pathlib import Path
 from typing import Optional, Dict, Any
 
+from llm.utils.logging import get_logger
+
+logger = get_logger(__name__)
+
 
 def save_checkpoint(
     model: torch.nn.Module,
@@ -50,7 +54,7 @@ def save_checkpoint(
     checkpoint.update(kwargs)
     
     torch.save(checkpoint, filepath)
-    print(f"Saved checkpoint to {filepath}")
+    logger.info(f"Saved checkpoint to {filepath}")
 
 
 def load_checkpoint(
@@ -89,7 +93,7 @@ def load_checkpoint(
     
     map_location = str(device) if device.type != "cpu" else "cpu"
     
-    print(f"Loading checkpoint from {filepath}")
+    logger.info(f"Loading checkpoint from {filepath}")
     checkpoint = torch.load(filepath, map_location=map_location)
     
     # Load model state

@@ -2,6 +2,10 @@ import math
 import torch
 import torch.nn as nn
 
+from llm.utils.logging import get_logger
+
+logger = get_logger(__name__)
+
 class MultiHeadAttention(nn.Module):
     """
     Multi-head-attention.
@@ -204,13 +208,13 @@ class CausalAttention(nn.Module):
         context_vector = attention_weights @ values
 
         # Debug prints
-        print("-----------------------Causal Attention Test-----------------------")
-        print("q:\n ", self.weight_query.weight.T)
-        print("k:\n ", self.weight_key.weight.T)
-        print("v:\n ", self.weight_value.weight.T)
-        print("mask:\n ", self.mask)
-        print("attention_weights:\n ", attention_weights)
-        print("context_vector:\n ", context_vector)
+        logger.debug("-----------------------Causal Attention Test-----------------------")
+        logger.debug(f"q:\n {self.weight_query.weight.T}")
+        logger.debug(f"k:\n {self.weight_key.weight.T}")
+        logger.debug(f"v:\n {self.weight_value.weight.T}")
+        logger.debug(f"mask:\n {self.mask}")
+        logger.debug(f"attention_weights:\n {attention_weights}")
+        logger.debug(f"context_vector:\n {context_vector}")
 
         return context_vector
 
@@ -266,15 +270,13 @@ class SelfAttention(nn.Module):
         context_vector = attention_weights @ values
 
         # Debug prints
-        print("-----------------------V1 TEST-----------------------")
-        print("keys:\n ", keys)
-        print("queries:\n ", queries)
-        print("values:\n ", values)
-        print("attention_scores:\n ", attention_scores)
-        print("attention_weights:\n ", attention_weights)
-        print("context_vector:\n ", context_vector)
-
-
+        logger.debug("-----------------------V1 TEST-----------------------")
+        logger.debug(f"keys:\n {keys}")
+        logger.debug(f"queries:\n {queries}")
+        logger.debug(f"values:\n {values}")
+        logger.debug(f"attention_scores:\n {attention_scores}")
+        logger.debug(f"attention_weights:\n {attention_weights}")
+        logger.debug(f"context_vector:\n {context_vector}")
 
         return context_vector
 
@@ -317,12 +319,12 @@ class SelfAttentionV2(nn.Module):
         context_vector = attention_weights @ values
 
         # Debug prints
-        print("-----------------------V2 TEST-----------------------")
-        print("keys:\n ", keys)
-        print("queries:\n ", queries)
-        print("values:\n ", values)
-        print("attention_scores:\n ", attention_scores)
-        print("attention_weights:\n ", attention_weights)
-        print("context_vector:\n ", context_vector)
+        logger.debug("-----------------------V2 TEST-----------------------")
+        logger.debug(f"keys:\n {keys}")
+        logger.debug(f"queries:\n {queries}")
+        logger.debug(f"values:\n {values}")
+        logger.debug(f"attention_scores:\n {attention_scores}")
+        logger.debug(f"attention_weights:\n {attention_weights}")
+        logger.debug(f"context_vector:\n {context_vector}")
 
         return context_vector

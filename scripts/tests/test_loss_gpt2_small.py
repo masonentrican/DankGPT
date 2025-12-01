@@ -4,10 +4,14 @@ from config.models import GPT2_SMALL
 from config.paths import DATA_DIR, MODELS_DIR, SCRIPTS_DIR
 from llm import GPTModel, calc_loss_load, create_dataloader, get_device, get_tokenizer
 from llm.utils.weights import load_openai_weights_into_gpt
+from llm.utils.logging import get_logger, setup_logging
 
 # Add scripts directory to path to import gpt_download
 sys.path.insert(0, str(SCRIPTS_DIR))
 from gpt_download import download_and_load_gpt2
+
+setup_logging()
+logger = get_logger(__name__)
 
 def main():
     """
@@ -69,8 +73,8 @@ def main():
     train_loss = calc_loss_load(train_loader, gpt, device)
     val_loss = calc_loss_load(val_loader, gpt, device)
 
-    print(f"Train loss: {train_loss:.4f}")
-    print(f"Val loss: {val_loss:.4f}")
+    logger.info(f"Train loss: {train_loss:.4f}")
+    logger.info(f"Val loss: {val_loss:.4f}")
 
 if __name__ == "__main__":
     main()

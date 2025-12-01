@@ -5,7 +5,7 @@
   "formatters": {
     "standard": {
       "()": "config.logging.DateTimeFormatter",
-      "format": "%(levelname)-8s[%(module)s:%(lineno)d] %(message)s"
+      "format": "%(levelname)-8s %(message)s"
     },
     "detailed": {
       "()": "config.logging.DateTimeFormatter",

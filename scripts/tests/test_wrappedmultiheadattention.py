@@ -1,5 +1,9 @@
 import torch
 from llm.models.selfattention import MultiHeadCausalAttention
+from llm.utils.logging import get_logger, setup_logging
+
+setup_logging()
+logger = get_logger(__name__)
 
 torch.manual_seed(123)
 
@@ -22,4 +26,4 @@ context_length = batch.shape[1]
 multihead_attn = MultiHeadCausalAttention(d_in, d_out, context_length, 0.0, num_heads=2)
 context_vectors = multihead_attn(batch)
 
-print("Context Vectors Shape:\n ", context_vectors.shape)
+logger.debug(f"Context Vectors Shape:\n {context_vectors.shape}")

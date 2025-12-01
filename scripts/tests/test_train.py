@@ -13,6 +13,10 @@ from llm import (
     train_model_simple,
 )
 from llm.utils.plot import plot_losses
+from llm.utils.logging import get_logger, setup_logging
+
+setup_logging()
+logger = get_logger(__name__)
 
 def main():
     """
@@ -59,19 +63,19 @@ def main():
         # Load existing checkpoint
         try:
             metadata = load_checkpoint(model_file, model, optimizer, device)
-            print(f"Resumed from checkpoint. Epoch: {metadata.get('epoch', 'N/A')}, Loss: {metadata.get('loss', 'N/A')}")
+            logger.info(f"Resumed from checkpoint. Epoch: {metadata.get('epoch', 'N/A')}, Loss: {metadata.get('loss', 'N/A')}")
         except Exception as e:
-            print(f"Error loading checkpoint: {e}. Starting fresh.")
+            logger.error(f"Error loading checkpoint: {e}. Starting fresh.")
     else:
-        print(f"No checkpoint found at {model_file}, starting fresh")
+        logger.info(f"No checkpoint found at {model_file}, starting fresh")
 
     # ============================================================================
     # Dataset statistics
     # ============================================================================
     total_characters = len(text_data)
     total_tokens = len(tokenizer.encode(text_data))
-    print(f"Total characters: {total_characters}")
-    print(f"Total tokens: {total_tokens}")
+    logger.info(f"Total characters: {total_characters}")
+    logger.info(f"Total tokens: {total_tokens}")
 
     # ============================================================================
     # Split data into training and validation sets
@@ -84,7 +88,7 @@ def main():
     # ============================================================================
     # Create data loaders
     # ============================================================================
-    print(f"INPUT: {train_cfg['start_context']}")
+    logger.info(f"INPUT: {train_cfg['start_context']}")
     train_loader = create_dataloader(
         train_data,
         batch_size=train_cfg["batch_size"],

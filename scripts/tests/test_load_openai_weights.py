@@ -4,12 +4,16 @@ from pathlib import Path
 from llm import GPTModel, generate_text, get_device, get_tokenizer
 from llm.utils.tokenization import text_to_token_ids, token_ids_to_text
 from llm.utils.weights import load_openai_weights_into_gpt
+from llm.utils.logging import get_logger, setup_logging
 from config.models import GPT2_SMALL
 from config.paths import PROJECT_ROOT, MODELS_DIR, SCRIPTS_DIR
 
 # Add scripts directory to path to import gpt_download
 sys.path.insert(0, str(SCRIPTS_DIR))
 from gpt_download import download_and_load_gpt2
+
+setup_logging()
+logger = get_logger(__name__)
 
 # Init torch and tokenizer
 device = get_device("auto")
@@ -36,5 +40,5 @@ token_ids = generate_text(
     temperature=1.5
 )
 
-print("-----------------------Load OpenAI Weights Test-----------------------")
-print("Generated text:\n", token_ids_to_text(token_ids, tokenizer))
+logger.info("-----------------------Load OpenAI Weights Test-----------------------")
+logger.info(f"Generated text:\n{token_ids_to_text(token_ids, tokenizer)}")

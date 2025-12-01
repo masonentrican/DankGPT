@@ -3,6 +3,9 @@ from matplotlib.ticker import MaxNLocator
 import torch
 
 from config.paths import PROJECT_ROOT
+from llm.utils.logging import get_logger
+
+logger = get_logger(__name__)
 
 def save_plot(plotname):
     # Ensure charts directory exists (relative to project root)
@@ -10,7 +13,7 @@ def save_plot(plotname):
     charts_dir.mkdir(exist_ok=True)
 
     plt.savefig(charts_dir / plotname, dpi=150)
-    print(f"Saved plot to {charts_dir / plotname}")
+    logger.info(f"Saved plot to {charts_dir / plotname}")
 
 def plot_losses(plotname, epochs_seen, tokens_seen, train_losses, val_losses):
     fig, ax1 = plt.subplots(figsize=(5, 3))

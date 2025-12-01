@@ -3,6 +3,10 @@ import torch
 
 from config.paths import PROJECT_ROOT
 from llm.models.feedforward import GELU
+from llm.utils.logging import get_logger, setup_logging
+
+setup_logging()
+logger = get_logger(__name__)
 
 """
 Test the GELU and ReLU activation functions.
@@ -27,4 +31,4 @@ charts_dir = PROJECT_ROOT / "charts"
 charts_dir.mkdir(exist_ok=True)
 
 plt.savefig(charts_dir / "gelu_vs_relu.png", dpi=150)
-print(f"Saved plot to {charts_dir / 'gelu_vs_relu.png'}")
+logger.info(f"Saved plot to {charts_dir / 'gelu_vs_relu.png'}")

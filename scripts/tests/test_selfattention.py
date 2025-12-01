@@ -1,5 +1,9 @@
 import torch
 from llm.models.selfattention import SelfAttention, SelfAttentionV2
+from llm.utils.logging import get_logger, setup_logging
+
+setup_logging()
+logger = get_logger(__name__)
 
 torch.manual_seed(789)
 
@@ -16,8 +20,8 @@ input_embeddings = torch.tensor([
 d_in = input_embeddings.shape[1]
 d_out = 2
 
-print("d_in: ",d_in)
-print("d_out: ",d_out)
+logger.debug(f"d_in: {d_in}")
+logger.debug(f"d_out: {d_out}")
 
 self_attn = SelfAttention(d_in,d_out)
 self_attn2 = SelfAttentionV2(d_in,d_out)

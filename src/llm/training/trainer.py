@@ -6,6 +6,9 @@ import torch
 from typing import TYPE_CHECKING
 
 from llm.generation import generate_and_print_sample
+from llm.utils.logging import get_logger
+
+logger = get_logger(__name__)
 
 if TYPE_CHECKING:
     from config.training import TrainingConfig
@@ -131,7 +134,7 @@ def train_model_simple(
                 train_losses.append(train_loss)
                 val_losses.append(val_loss)
                 track_tokens_seen.append(tokens_seen)
-                print(f"Epoch {epoch+1}, Step {global_step:06d}: "
+                logger.info(f"Epoch {epoch+1}, Step {global_step:06d}: "
                 f"Train Loss: {train_loss:.4f}, "
                 f"Val Loss: {val_loss:.4f}, "
                 f"Tokens seen: {tokens_seen:08d}")

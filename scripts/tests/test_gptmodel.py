@@ -1,7 +1,10 @@
 import torch
 from config.models import GPT2_SMALL
 from llm import GPTModel, get_tokenizer
+from llm.utils.logging import get_logger, setup_logging
 
+setup_logging()
+logger = get_logger(__name__)
 
 # Prepare batch
 tokenizer = get_tokenizer()
@@ -29,15 +32,15 @@ total_size_mb = total_size_bytes / (1024 * 1024)
 
 
 # Debug prints
-print("-----------------------GPT Model Test-----------------------")
-print("Batch:\n ", batch)
-print("Logits Shape:\n ", logits.shape)
-print("Logits:\n ", logits)
-print("Total parameters:\n ", total_params)
-print("Total trainable parameters:\n ", total_trainable_params)
-print("Token embedding layer shape:\n ", model.emb.tok_emb.weight.shape)
-print("Output layer shape:\n ", model.out_head.weight.shape)
-print("Total size in MB:\n ", total_size_mb)
+logger.debug("-----------------------GPT Model Test-----------------------")
+logger.debug(f"Batch:\n {batch}")
+logger.debug(f"Logits Shape:\n {logits.shape}")
+logger.debug(f"Logits:\n {logits}")
+logger.debug(f"Total parameters:\n {total_params}")
+logger.debug(f"Total trainable parameters:\n {total_trainable_params}")
+logger.debug(f"Token embedding layer shape:\n {model.emb.tok_emb.weight.shape}")
+logger.debug(f"Output layer shape:\n {model.out_head.weight.shape}")
+logger.debug(f"Total size in MB:\n {total_size_mb}")
 
 """
 EXPECTED OUTPUT from 124m model:

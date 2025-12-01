@@ -1,5 +1,9 @@
 import torch
 from llm.utils.plot import plot_temperature_scaling
+from llm.utils.logging import get_logger, setup_logging
+
+setup_logging()
+logger = get_logger(__name__)
 
 def main():
     vocab = { 
@@ -37,7 +41,7 @@ def print_sampled_tokens(probas, inverse_vocab):
     sample = [torch.multinomial(probas, num_samples=1).item() for i in range(1_000)]
     sampled_ids = torch.bincount(torch.tensor(sample), minlength=len(probas))
     for i, freq in enumerate(sampled_ids):
-        print(f"{freq} x {inverse_vocab[i]}")
+        logger.info(f"{freq} x {inverse_vocab[i]}")
 
 def softmax_with_temperature(logits, temperature):
     scaled_logits = logits / temperature

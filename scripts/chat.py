@@ -5,12 +5,15 @@ import torch
 from llm import GPTModel, generate_text, get_device, get_tokenizer
 from llm.utils.tokenization import text_to_token_ids, token_ids_to_text
 from llm.utils.weights import load_openai_weights_into_gpt
+from llm.utils.logging import get_logger, setup_logging
 from config.models import GPT2_XLARGE
 from config.paths import MODELS_DIR, SCRIPTS_DIR
 
 # Add scripts directory to path to import gpt_download
 sys.path.insert(0, str(SCRIPTS_DIR))
 from gpt_download import download_and_load_gpt2
+
+logger = get_logger(__name__)
 
 def main(gpt_config, input_prompt, model_size, device):
 
@@ -33,7 +36,7 @@ def main(gpt_config, input_prompt, model_size, device):
         temperature=1.0
     )
 
-    print("Output text:\n", token_ids_to_text(token_ids, tokenizer))
+    logger.info(f"Output text:\n{token_ids_to_text(token_ids, tokenizer)}")
 
 if __name__ == "__main__":
 
@@ -48,11 +51,13 @@ if __name__ == "__main__":
 
     torch.manual_seed(123)
 
+    setup_logging()
+    
     INPUT_PROMPT = input("Enter your prompt: ")
     DEVICE = get_device(args.device)
 
-    print("PyTorch:", torch.__version__)
-    print("Device:", DEVICE)
-    print()
+    logger.info(f"PyTorch: {torch.__version__}")
+    logger.info(f"Device: {DEVICE}")
+    logger.info("")
 
     main(GPT2_XLARGE, INPUT_PROMPT, "1558M", DEVICE)

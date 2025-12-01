@@ -12,6 +12,10 @@ import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
 
+from llm.utils.logging import get_logger
+
+logger = get_logger(__name__)
+
 
 def download_and_load_gpt2(model_size, models_dir):
     # Validate model size
@@ -56,7 +60,7 @@ def download_file(url, destination, backup_url=None):
         if os.path.exists(destination):
             file_size_local = os.path.getsize(destination)
             if file_size and file_size == file_size_local:
-                print(f"File already exists and is up-to-date: {destination}")
+                logger.info(f"File already exists and is up-to-date: {destination}")
                 return True
 
         block_size = 1024  # 1 KB
@@ -74,7 +78,7 @@ def download_file(url, destination, backup_url=None):
             return
     except requests.exceptions.RequestException:
         if backup_url is not None:
-            print(f"Primary URL ({url}) failed. Attempting backup URL: {backup_url}")
+            logger.warning(f"Primary URL ({url}) failed. Attempting backup URL: {backup_url}")
             try:
                 if _attempt_download(backup_url):
                     return
@@ -87,9 +91,9 @@ def download_file(url, destination, backup_url=None):
             "\nCheck your internet connection or the file availability.\n"
             "For help, visit: https://github.com/rasbt/LLMs-from-scratch/discussions/273"
         )
-        print(error_message)
+        logger.error(error_message)
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        logger.error(f"An unexpected error occurred: {e}")
 
 
 # Alternative way using `requests`

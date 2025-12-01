@@ -2,6 +2,10 @@ import torch
 from config.models import SMOOTHBRAIN, GPT2_SMALL
 from llm import GPTModel, generate_text, get_tokenizer
 from llm.utils.tokenization import text_to_token_ids, token_ids_to_text
+from llm.utils.logging import get_logger, setup_logging
+
+setup_logging()
+logger = get_logger(__name__)
 
 def main():
     """
@@ -22,7 +26,7 @@ def main():
         temperature=1.4
     )
 
-    print("Output text:\n", token_ids_to_text(token_ids, tokenizer))
+    logger.info(f"Output text:\n{token_ids_to_text(token_ids, tokenizer)}")
 
 if __name__ == "__main__":
     main()
