@@ -9,11 +9,15 @@ import json
 import os
 import logging
 import logging.config
+import atexit
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
 
 from config.paths import PROJECT_ROOT, LOGS_DIR
+
+# Module-level variable to track if listener has been started
+_queue_listener_started = False
 
 
 class DateTimeFormatter(logging.Formatter):
@@ -178,9 +182,39 @@ def setup_logging(config_path: Optional[Path] = None) -> None:
     This function loads the JSON configuration, applies environment variable
     overrides, and configures Python's logging system using dictConfig.
     
+    If a queue handler is configured, this function will start the QueueListener
+    thread to process log records asynchronously.
+    
+    The function is idempotent -
+    calling it multiple times is safe and will only start the listener once.
+    
     Args:
         config_path: Optional path to JSON configuration file. If not provided,
                      uses default or LOG_CONFIG environment variable.
     """
+    global _queue_listener_started
+    
     config = get_logging_config(config_path)
+    
+    # Apply the configuration
     logging.config.dictConfig(config)
+    
+    # If queue handler is configured, start its listener
+    # Try getHandlerByName first (Python 3.13+), fallback to searching root logger
+    queue_handler = None
+    try:
+        queue_handler = logging.getHandlerByName("queue_handler")
+    except AttributeError:
+        # Fallback: search root logger's handlers
+        root_logger = logging.getLogger()
+        for handler in root_logger.handlers:
+            if isinstance(handler, logging.handlers.QueueHandler):
+                queue_handler = handler
+                break
+    
+    if queue_handler is not None and not _queue_listener_started:
+        if hasattr(queue_handler, 'listener') and queue_handler.listener is not None:
+            queue_handler.listener.start()
+            # Register cleanup on exit
+            atexit.register(queue_handler.listener.stop)
+            _queue_listener_started = True

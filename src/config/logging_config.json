@@ -32,6 +32,11 @@
       "backupCount": 5,
       "delay": false,
       "filters": []
+    },
+    "queue_handler": {
+      "class": "logging.handlers.QueueHandler",
+      "handlers": ["console", "file"],
+      "respect_handler_level": true
     }
   },
   "loggers": {
@@ -75,6 +80,6 @@
   },
   "root": {
     "level": "DEBUG",
-    "handlers": ["console", "file"]
+    "handlers": ["queue_handler"]
   }
 }
