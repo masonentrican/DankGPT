@@ -59,6 +59,18 @@
       "level": "INFO",
       "handlers": ["console", "file"],
       "propagate": false
+    },
+    "matplotlib": {
+      "level": "WARNING",
+      "propagate": false
+    },
+    "matplotlib.pyplot": {
+      "level": "WARNING",
+      "propagate": false
+    },
+    "matplotlib.font_manager": {
+      "level": "WARNING",
+      "propagate": false
     }
   },
   "root": {

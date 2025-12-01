@@ -25,7 +25,7 @@ def test_basic_logging():
     setup_logging()
     logger = get_logger(__name__)
     
-    logger.info("\n" + "=" * 70)
+    logger.info("=" * 70)
     logger.info("TEST 1: Basic Logging - All Levels")
     logger.info("=" * 70)
     
@@ -35,7 +35,7 @@ def test_basic_logging():
     logger.error("This is an ERROR message")
     logger.critical("This is a CRITICAL message")
     
-    logger.info("\n✓ Basic logging test completed")
+    logger.info("✓ Basic logging test completed")
     logger.info(f"  Check log file at: {LOGS_DIR / 'app.log'}")
 
 
@@ -44,7 +44,7 @@ def test_logger_hierarchy():
     setup_logging()
     logger = get_logger(__name__)
     
-    logger.info("\n" + "=" * 70)
+    logger.info("=" * 70)
     logger.info("TEST 2: Logger Hierarchy")
     logger.info("=" * 70)
     
@@ -61,7 +61,7 @@ def test_logger_hierarchy():
     training_logger.info("Training logger message")
     generation_logger.info("Generation logger message")
     
-    logger.info("\n✓ Logger hierarchy test completed")
+    logger.info("✓ Logger hierarchy test completed")
 
 
 def test_custom_logger():
@@ -69,7 +69,7 @@ def test_custom_logger():
     setup_logging()
     logger = get_logger(__name__)
     
-    logger.info("\n" + "=" * 70)
+    logger.info("=" * 70)
     logger.info("TEST 3: Custom Logger")
     logger.info("=" * 70)
     
@@ -79,7 +79,7 @@ def test_custom_logger():
     custom_logger.info("Info message from test_module")
     custom_logger.warning("Warning message from test_module")
     
-    logger.info("\n✓ Custom logger test completed")
+    logger.info("✓ Custom logger test completed")
 
 
 def test_logging_with_context():
@@ -87,7 +87,7 @@ def test_logging_with_context():
     setup_logging()
     logger = get_logger(__name__)
     
-    logger.info("\n" + "=" * 70)
+    logger.info("=" * 70)
     logger.info("TEST 4: Logging with Context")
     logger.info("=" * 70)
     
@@ -105,7 +105,7 @@ def test_logging_with_context():
     except ZeroDivisionError as e:
         logger.error(f"Error occurred: {e}", exc_info=True)
     
-    logger.info("\n✓ Context logging test completed")
+    logger.info("✓ Context logging test completed")
 
 
 def test_environment_override():
@@ -113,7 +113,7 @@ def test_environment_override():
     setup_logging()
     logger = get_logger(__name__)
     
-    logger.info("\n" + "=" * 70)
+    logger.info("=" * 70)
     logger.info("TEST 5: Environment Variable Override")
     logger.info("=" * 70)
     
@@ -129,7 +129,7 @@ def test_environment_override():
         # Re-setup logging to pick up env vars
         setup_logging()
         
-        logger.info("\n  Console level set to WARNING (should only see WARNING and above)")
+        logger.info("  Console level set to WARNING (should only see WARNING and above)")
         logger.info("  File level set to DEBUG (all messages should be in file)")
         
         logger.debug("This DEBUG message should NOT appear in console")
@@ -137,7 +137,7 @@ def test_environment_override():
         logger.warning("This WARNING message SHOULD appear in console")
         logger.error("This ERROR message SHOULD appear in console")
         
-        logger.info("\n✓ Environment override test completed")
+        logger.info("✓ Environment override test completed")
         logger.info("  Check log file - it should contain all messages including DEBUG")
         
     finally:
@@ -158,7 +158,7 @@ def test_custom_config_path():
     setup_logging()
     logger = get_logger(__name__)
     
-    logger.info("\n" + "=" * 70)
+    logger.info("=" * 70)
     logger.info("TEST 6: Custom Config Path")
     
     from config.paths import PROJECT_ROOT
@@ -168,9 +168,9 @@ def test_custom_config_path():
     if default_config_path.exists():
         setup_logging(default_config_path)
         logger.info("Loaded logging config from custom path")
-        logger.info("\n✓ Custom config path test completed")
+        logger.info("✓ Custom config path test completed")
     else:
-        logger.error(f"\n✗ Config file not found at: {default_config_path}")
+        logger.error(f"✗ Config file not found at: {default_config_path}")
 
 
 def main():
@@ -178,7 +178,7 @@ def main():
     setup_logging()
     logger = get_logger(__name__)
     
-    logger.info("\n" + "=" * 70)
+    logger.info("=" * 70)
     logger.info("LOGGING SYSTEM TEST SUITE")
     logger.info("=" * 70)
     
@@ -190,16 +190,16 @@ def main():
         test_environment_override()
         test_custom_config_path()
         
-        logger.info("\n" + "=" * 70)
+        logger.info("=" * 70)
         logger.info("ALL TESTS COMPLETED")
         logger.info("=" * 70)
-        logger.info(f"\nLog files are located in: {LOGS_DIR}")
+        logger.info(f"Log files are located in: {LOGS_DIR}")
         logger.info("  - app.log (standard log file)")
         logger.info("  - app_detailed.log (rotating detailed log file)")
-        logger.info("\nCheck the log files to verify all messages were written correctly.")
+        logger.info("Check the log files to verify all messages were written correctly.")
         
     except Exception as e:
-        logger.error(f"\n✗ Test suite failed with error: {e}")
+        logger.error(f"✗ Test suite failed with error: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)
