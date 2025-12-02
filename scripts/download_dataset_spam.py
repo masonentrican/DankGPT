@@ -5,6 +5,10 @@ import os
 from config.paths import DATA_DIR
 from llm.utils.logging import get_logger, setup_logging
 
+"""
+Download the SMS Spam Collection dataset from the UCI Machine Learning Repository.
+"""
+
 logger = get_logger(__name__)
 setup_logging()
 
