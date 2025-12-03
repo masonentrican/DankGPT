@@ -4,9 +4,10 @@ Test classification fine tuning on spam dataset.
 
 import pandas as pd
 from config.paths import DATA_DIR
+from llm import get_tokenizer
+from llm.data.classification import ClassificationDataset
 from llm.utils.classification import balance_two_class_dataset, train_val_test_split
 from llm.utils.logging import get_logger, setup_logging
-
 
 
 setup_logging()
@@ -23,14 +24,12 @@ def main():
 
     # Unbalanced DataFrame
     logger.info(f"Unbalanced DataFrame Loaded Successfully")
-    logger.info("--------------------------------")
     logger.debug(f"DataFrame at path: {_data_file_path}")
     logger.debug(f"DataFrame Labels:\n\n{dataFrame['Label'].value_counts()}\n")
 
     # Balanced DataFrame
     balanced_df = balance_two_class_dataset(dataFrame)
     logger.info(f"Balanced DataFrame Created Successfully")
-    logger.info("--------------------------------")
     logger.debug(f"DataFrame Labels: \n\n{balanced_df['Label'].value_counts()}\n")
     logger.debug(f"DataFrame Contents:\n\n{balanced_df}\n")
     
@@ -39,19 +38,16 @@ def main():
 
     # Train DataFrame
     logger.info(f"Train DataFrame Created Successfully")
-    logger.info("--------------------------------")
     logger.debug(f"Train DataFrame Labels: \n\n{train_df['Label'].value_counts()}\n")
     logger.debug(f"Train DataFrame Contents:\n\n{train_df}\n")
     
     # Validation DataFrame
     logger.info(f"Validation DataFrame Created Successfully")
-    logger.info("--------------------------------")
     logger.debug(f"Validation DataFrame Labels: \n\n{val_df['Label'].value_counts()}\n")
     logger.debug(f"Validation DataFrame Contents:\n\n{val_df}\n")
 
     # Test DataFrame
     logger.info(f"Test DataFrame Created Successfully")
-    logger.info("--------------------------------")
     logger.debug(f"Test DataFrame Labels: \n\n{test_df['Label'].value_counts()}\n")
     logger.debug(f"Test DataFrame Contents:\n\n{test_df}\n")
 
@@ -63,9 +59,20 @@ def main():
 
     logger.info(f"Saved DataFrames to: {DATA_DIR / 'processed' / 'spam'}\n")
 
+    # Create Dataset
+    tokenizer = get_tokenizer()
+    train_dataset = ClassificationDataset(
+        csv_file=DATA_DIR / "processed" / "spam" / "train.csv",
+        tokenizer=tokenizer
+    )
+
+    logger.info(f"Train Dataset Valid: {train_dataset is not None}")
+    logger.info(f"Train Dataset Max Length: {train_dataset.max_length}")
+
     # End Test
     logger.info(50 * "=")
     logger.info("End Classification Test")
     logger.info(50 * "=" + "\n")
+    
 if __name__ == "__main__":
     main()
