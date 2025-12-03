@@ -3,23 +3,25 @@ Test classification fine tuning on spam dataset.
 """
 
 import sys
+import time
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 from config.paths import DATA_DIR, MODELS_DIR, SCRIPTS_DIR
 from config.models import GPT2_SMALL
-from llm import GPTModel, generate_text, get_device, get_tokenizer
+from config.training import QUICK
+from llm import GPTModel, get_device, get_tokenizer
 from llm.data.classification import ClassificationDataset
-from llm.training.trainer import calc_classification_accuracy_loader
+from llm.training.trainer import calc_classification_accuracy_loader, calc_classification_loss_loader, train_classification_model_simple
 from llm.utils.classification import balance_two_class_dataset, train_val_test_split
 from llm.utils.logging import get_logger, setup_logging
-from llm.utils.tokenization import text_to_token_ids, token_ids_to_text
 from llm.utils.weights import load_openai_weights_into_gpt
 
 setup_logging()
 logger = get_logger(__name__)
 
 _data_file_path = DATA_DIR / "raw" / "sms_spam_collection.tsv" / "sms_spam_collection.tsv"
+_train_cfg = QUICK.copy()
 
 def main():
     dataFrame = pd.read_csv(_data_file_path, sep="\t", header=None, names=["Label", "Text"])
@@ -155,6 +157,7 @@ def main():
 
     # Prepare the model for training
     model = GPTModel(GPT2_SMALL)
+    load_openai_weights_into_gpt(model, params)
     torch.manual_seed(123)
     num_classes = 2
     model.out_head = torch.nn.Linear(in_features=GPT2_SMALL['emb_dim'], out_features=num_classes)
@@ -182,15 +185,27 @@ def main():
     model.to(device)
     torch.manual_seed(123)
 
-    train_accuracy = calc_classification_accuracy_loader(train_loader, model, device, num_batches=10)
-    val_accuracy = calc_classification_accuracy_loader(val_loader, model, device, num_batches=10)
-    test_accuracy = calc_classification_accuracy_loader(test_loader, model, device, num_batches=10)
+    optimizer = torch.optim.Adam(model.parameters(), lr=5e-5, weight_decay=0.01)
 
-    logger.info(f"Train Accuracy: {train_accuracy*100:.2f}%")
-    logger.info(f"Validation Accuracy: {val_accuracy*100:.2f}%")
-    logger.info(f"Test Accuracy: {test_accuracy*100:.2f}%")
+    #Override basic training configuration for classification on small dataset
+    _train_cfg["num_epochs"] = 5
+    _train_cfg["eval_freq"] = 50
+    _train_cfg["eval_iter"] = 5
 
+    start_time = time.time()
 
+    train_losses, val_losses, train_accuracies, val_accuracies, examples_seen = train_classification_model_simple(
+        model,
+        train_loader=train_loader,
+        val_loader=val_loader,
+        optimizer=optimizer,
+        device=device,
+        train_config=_train_cfg,
+        tokenizer=tokenizer
+    )
+
+    end_time = time.time()
+    logger.info(f"Training time: {(end_time - start_time) / 60} minutes")
 
     # End Test
     logger.info(50 * "=")
