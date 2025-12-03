@@ -10,7 +10,7 @@ from config.paths import DATA_DIR, MODELS_DIR, SCRIPTS_DIR
 from config.models import GPT2_SMALL
 from llm import GPTModel, generate_text, get_device, get_tokenizer
 from llm.data.classification import ClassificationDataset
-from llm.training.trainer import calc_accuracy_load
+from llm.training.trainer import calc_classification_accuracy_loader
 from llm.utils.classification import balance_two_class_dataset, train_val_test_split
 from llm.utils.logging import get_logger, setup_logging
 from llm.utils.tokenization import text_to_token_ids, token_ids_to_text
@@ -178,17 +178,18 @@ def main():
 
     device = get_device()
 
-    print(f"Device: {device}")
+    logger.info(f"Device: {device}")
     model.to(device)
     torch.manual_seed(123)
 
-    train_accuracy = calc_accuracy_load(train_loader, model, device, num_batches=10)
-    val_accuracy = calc_accuracy_load(val_loader, model, device, num_batches=10)
-    test_accuracy = calc_accuracy_load(test_loader, model, device, num_batches=10)
+    train_accuracy = calc_classification_accuracy_loader(train_loader, model, device, num_batches=10)
+    val_accuracy = calc_classification_accuracy_loader(val_loader, model, device, num_batches=10)
+    test_accuracy = calc_classification_accuracy_loader(test_loader, model, device, num_batches=10)
 
     logger.info(f"Train Accuracy: {train_accuracy*100:.2f}%")
     logger.info(f"Validation Accuracy: {val_accuracy*100:.2f}%")
     logger.info(f"Test Accuracy: {test_accuracy*100:.2f}%")
+
 
 
     # End Test

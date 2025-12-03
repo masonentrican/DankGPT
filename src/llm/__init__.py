@@ -17,10 +17,10 @@ from llm.data import GPTDataset, create_dataloader, download_text
 
 # Training exports
 from llm.training import (
-    calc_loss_batch,
-    calc_loss_load,
-    evaluate_model,
-    train_model_simple,
+    calc_language_loss_batch,
+    calc_language_loss_loader,
+    evaluate_language_model,
+    train_language_model_simple,
 )
 
 # Generation exports
@@ -42,10 +42,10 @@ __all__ = [
     "create_dataloader",
     "download_text",
     # Training
-    "calc_loss_batch",
-    "calc_loss_load",
-    "evaluate_model",
-    "train_model_simple",
+    "calc_language_loss_batch",
+    "calc_language_loss_loader",
+    "evaluate_language_model",
+    "train_language_model_simple",
     # Generation
     "generate_text",
     "generate_and_print_sample",

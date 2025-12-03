@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from config.training import TrainingConfig
 
 
-def calc_loss_batch(input_batch, target_batch, model, device):
+def calc_language_loss_batch(input_batch, target_batch, model, device):
     """
     Calculate the loss for a batch of input and target tokens using cross entropy loss.
 
@@ -33,7 +33,7 @@ def calc_loss_batch(input_batch, target_batch, model, device):
     return loss
 
 
-def calc_loss_load(data_loader, model, device, num_batches=None):
+def calc_language_loss_loader(data_loader, model, device, num_batches=None):
     """
     Calculate the average loss over multiple batches from a DataLoader.
 
@@ -55,13 +55,13 @@ def calc_loss_load(data_loader, model, device, num_batches=None):
         num_batches = min(num_batches, len(data_loader))  # match data loader length if num_batches is higher
     for i, (input_batch, target_batch) in enumerate(data_loader):
         if i < num_batches:
-            loss = calc_loss_batch(input_batch, target_batch, model, device)
+            loss = calc_language_loss_batch(input_batch, target_batch, model, device)
             total_loss += loss.item()
         else:
             break
     return total_loss / num_batches
 
-def calc_accuracy_load(data_loader, model, device, num_batches=None):
+def calc_classification_accuracy_loader(data_loader, model, device, num_batches=None):
     """
     Calculate the accuracy over multiple batches from a classification DataLoader.
 
@@ -96,7 +96,7 @@ def calc_accuracy_load(data_loader, model, device, num_batches=None):
     return correct_predictions / num_examples
 
 
-def evaluate_model(model, train_loader, val_loader, device, eval_iter):
+def evaluate_language_model(model, train_loader, val_loader, device, eval_iter):
     """
     Evaluate the model on the train and validation sets.
 
@@ -112,13 +112,13 @@ def evaluate_model(model, train_loader, val_loader, device, eval_iter):
     """
     model.eval()  # Disable dropout and batch normalization
     with torch.no_grad():
-        train_loss = calc_loss_load(train_loader, model, device, eval_iter)  # Calculate loss on train set
-        val_loss = calc_loss_load(val_loader, model, device, eval_iter)  # Calculate loss on validation set
+        train_loss = calc_language_loss_loader(train_loader, model, device, eval_iter)  # Calculate loss on train set
+        val_loss = calc_language_loss_loader(val_loader, model, device, eval_iter)  # Calculate loss on validation set
     model.train()
     return train_loss, val_loss
 
 
-def train_model_simple(
+def train_language_model_simple(
     model,
     train_loader,
     val_loader,
@@ -156,7 +156,7 @@ def train_model_simple(
         
         for input_batch, target_batch in train_loader:
             optimizer.zero_grad()  # Reset loss gradient from previous batch iteration
-            loss = calc_loss_batch(input_batch, target_batch, model, device)
+            loss = calc_language_loss_batch(input_batch, target_batch, model, device)
             loss.backward()  # Backpropagate the loss
             optimizer.step()  # UPDATE MODEL PARAMETERS
             tokens_seen += input_batch.numel()
@@ -164,7 +164,7 @@ def train_model_simple(
 
             # Evaluate model on validation set
             if global_step % eval_freq == 0:
-                train_loss, val_loss = evaluate_model(model, train_loader, val_loader, device, eval_iter)
+                train_loss, val_loss = evaluate_language_model(model, train_loader, val_loader, device, eval_iter)
                 train_losses.append(train_loss)
                 val_losses.append(val_loss)
                 track_tokens_seen.append(tokens_seen)

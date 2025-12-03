@@ -2,7 +2,7 @@ import sys
 import torch
 from config.models import GPT2_SMALL
 from config.paths import DATA_DIR, MODELS_DIR, SCRIPTS_DIR
-from llm import GPTModel, calc_loss_load, create_dataloader, get_device, get_tokenizer
+from llm import GPTModel, calc_language_loss_loader, create_dataloader, get_device, get_tokenizer
 from llm.utils.weights import load_openai_weights_into_gpt
 from llm.utils.logging import get_logger, setup_logging
 
@@ -70,8 +70,8 @@ def main():
 
     torch.manual_seed(123) # Again because of shuffling in the dataloader
 
-    train_loss = calc_loss_load(train_loader, gpt, device)
-    val_loss = calc_loss_load(val_loader, gpt, device)
+    train_loss = calc_language_loss_loader(train_loader, gpt, device)
+    val_loss = calc_language_loss_loader(val_loader, gpt, device)
 
     logger.info(f"Train loss: {train_loss:.4f}")
     logger.info(f"Val loss: {val_loss:.4f}")

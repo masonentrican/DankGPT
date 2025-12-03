@@ -10,7 +10,7 @@ from llm import (
     get_tokenizer,
     load_checkpoint,
     save_checkpoint,
-    train_model_simple,
+    train_language_model_simple,
 )
 from llm.utils.plot import plot_losses
 from llm.utils.logging import get_logger, setup_logging
@@ -113,7 +113,7 @@ def main():
     # ============================================================================
     # Train the model: forward pass, compute loss, backpropagate, update weights
     # Returns loss history and token count for monitoring training progress
-    train_losses, val_losses, tokens_seen = train_model_simple(
+    train_losses, val_losses, tokens_seen = train_language_model_simple(
         model, train_loader, val_loader, optimizer, device, train_cfg, tokenizer
     )
 
