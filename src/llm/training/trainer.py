@@ -61,6 +61,40 @@ def calc_loss_load(data_loader, model, device, num_batches=None):
             break
     return total_loss / num_batches
 
+def calc_accuracy_load(data_loader, model, device, num_batches=None):
+    """
+    Calculate the accuracy over multiple batches from a classification DataLoader.
+
+    Args:
+        data_loader: DataLoader providing input and target batches.
+        model: GPT model instance.
+        device: Device to run computation on.
+        num_batches: Number of batches to evaluate. If None, evaluates all batches.
+
+    Returns:
+        float: Accuracy value.
+    """
+    model.eval()
+    correct_predictions, num_examples = 0, 0
+
+    if num_batches is None:
+        num_batches = len(data_loader)
+    else:
+        num_batches = min(num_batches, len(data_loader))
+    for i, (input_batch, target_batch) in enumerate(data_loader):
+        if i < num_batches:
+            input_batch, target_batch = input_batch.to(device), target_batch.to(device)
+
+            with torch.no_grad():
+                logits = model(input_batch)[:, -1, :]
+            predicted_labels = torch.argmax(logits, dim=-1)
+
+            num_examples += predicted_labels.shape[0]
+            correct_predictions += (predicted_labels == target_batch).sum().item()
+        else:
+            break
+    return correct_predictions / num_examples
+
 
 def evaluate_model(model, train_loader, val_loader, device, eval_iter):
     """

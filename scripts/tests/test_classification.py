@@ -8,8 +8,9 @@ import torch
 from torch.utils.data import DataLoader
 from config.paths import DATA_DIR, MODELS_DIR, SCRIPTS_DIR
 from config.models import GPT2_SMALL
-from llm import GPTModel, generate_text, get_tokenizer
+from llm import GPTModel, generate_text, get_device, get_tokenizer
 from llm.data.classification import ClassificationDataset
+from llm.training.trainer import calc_accuracy_load
 from llm.utils.classification import balance_two_class_dataset, train_val_test_split
 from llm.utils.logging import get_logger, setup_logging
 from llm.utils.tokenization import text_to_token_ids, token_ids_to_text
@@ -152,23 +153,43 @@ def main():
         "Reinitialize the dataset with a smaller max length."
     )
 
+    # Prepare the model for training
     model = GPTModel(GPT2_SMALL)
-    load_openai_weights_into_gpt(model, params)
-    model.eval()
+    torch.manual_seed(123)
+    num_classes = 2
+    model.out_head = torch.nn.Linear(in_features=GPT2_SMALL['emb_dim'], out_features=num_classes)
 
-    prompt = (
-        "Is the following text 'spam'? Answer with 'yes' or 'no':"
-        " ' You are a winner you have been speciialy"
-        " selected to receive $1000 cash or a $2000 award.'"
-    )
+    # Freeze training of the whole model except the last transformer block and final LayerNorm module
+    for param in model.parameters():
+        param.requires_grad = False
+    for param in model.trf_blocks[-1].parameters():
+        param.requires_grad = True
+    for param in model.final_norm.parameters():
+        param.requires_grad = True
 
-    token_ids = generate_text(
-        model=model,
-        idx=text_to_token_ids(prompt, tokenizer),
-        max_new_tokens=23,
-        context_size=GPT2_SMALL["context_length"],
-    )
-    logger.info(f"Generated Text From: {token_ids_to_text(token_ids, tokenizer)}")
+    # Test the model
+    logger.info("------- Test Model -------")
+
+    inputs = tokenizer.encode("Do you have time")
+    inputs = torch.tensor(inputs).unsqueeze(0)
+
+    logger.info(f"Inputs: {inputs}")
+    logger.info(f"Inputs dimensions: {inputs.shape}")
+
+    device = get_device()
+
+    print(f"Device: {device}")
+    model.to(device)
+    torch.manual_seed(123)
+
+    train_accuracy = calc_accuracy_load(train_loader, model, device, num_batches=10)
+    val_accuracy = calc_accuracy_load(val_loader, model, device, num_batches=10)
+    test_accuracy = calc_accuracy_load(test_loader, model, device, num_batches=10)
+
+    logger.info(f"Train Accuracy: {train_accuracy*100:.2f}%")
+    logger.info(f"Validation Accuracy: {val_accuracy*100:.2f}%")
+    logger.info(f"Test Accuracy: {test_accuracy*100:.2f}%")
+
 
     # End Test
     logger.info(50 * "=")
