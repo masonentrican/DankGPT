@@ -61,7 +61,7 @@ def calc_language_loss_loader(data_loader, model, device, num_batches=None):
             break
     return total_loss / num_batches
 
-def calc_classification_accuracy_loader(data_loader, model, device, num_batches=None):
+def calc_classification_accuracy_loader(data_loader, model, device, num_batches=None, pad_token_id=50256):
     """
     Calculate the accuracy over multiple batches from a classification DataLoader.
 
@@ -70,6 +70,7 @@ def calc_classification_accuracy_loader(data_loader, model, device, num_batches=
         model: GPT model instance.
         device: Device to run computation on.
         num_batches: Number of batches to evaluate. If None, evaluates all batches.
+        pad_token_id: Token ID used for padding.
 
     Returns:
         float: Accuracy value.
@@ -86,7 +87,14 @@ def calc_classification_accuracy_loader(data_loader, model, device, num_batches=
             input_batch, target_batch = input_batch.to(device), target_batch.to(device)
 
             with torch.no_grad():
-                logits = model(input_batch)[:, -1, :]
+                all_logits = model(input_batch)  # [batch_size, seq_len, num_classes]
+                # Find last non-padding token for each sequence in the batch
+                mask = (input_batch != pad_token_id)
+                # Last non-padding index = number of non-padding tokens - 1
+                last_non_pad_indices = (mask.sum(dim=1) - 1).clamp(min=0)
+                # Extract logits for the last non-padding token of each sequence
+                batch_indices = torch.arange(input_batch.size(0), device=device)
+                logits = all_logits[batch_indices, last_non_pad_indices, :]
             predicted_labels = torch.argmax(logits, dim=-1)
 
             num_examples += predicted_labels.shape[0]
@@ -95,7 +103,7 @@ def calc_classification_accuracy_loader(data_loader, model, device, num_batches=
             break
     return correct_predictions / num_examples
 
-def calc_classification_loss_batch(input_batch, target_batch, model, device):
+def calc_classification_loss_batch(input_batch, target_batch, model, device, pad_token_id=50256):
     """
     Calculate the loss for a batch of input and target tokens using cross entropy loss.
 
@@ -104,12 +112,20 @@ def calc_classification_loss_batch(input_batch, target_batch, model, device):
         target_batch: Target token indices tensor.
         model: GPT model instance.
         device: Device to run computation on.
+        pad_token_id: Token ID used for padding.
 
     Returns:
         torch.Tensor: Loss value.
     """
     input_batch, target_batch = input_batch.to(device), target_batch.to(device)
-    logits = model(input_batch)[:, -1, :]
+    all_logits = model(input_batch)  # [batch_size, seq_len, num_classes]
+    # Find last non-padding token for each sequence in the batch
+    mask = (input_batch != pad_token_id)
+    # Last non-padding index = number of non-padding tokens - 1
+    last_non_pad_indices = (mask.sum(dim=1) - 1).clamp(min=0)
+    # Extract logits for the last non-padding token of each sequence
+    batch_indices = torch.arange(input_batch.size(0), device=device)
+    logits = all_logits[batch_indices, last_non_pad_indices, :]
     loss = torch.nn.functional.cross_entropy(logits, target_batch)
     return loss
 

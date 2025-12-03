@@ -173,9 +173,19 @@ def main():
     num_classes = 2
     model.out_head = torch.nn.Linear(in_features=model_cfg['emb_dim'], out_features=num_classes)
     
-    # Move to device
+    # Create device
     device = get_device()
     logger.info(f"Device: {device}")
+
+    # Load existing clasifier weights if they exist
+    model_path = MODELS_DIR / "spam_classifier.pth"
+    if model_path.exists():
+        model.load_state_dict(torch.load(model_path, map_location=device, weights_only=True))
+        logger.info(f"Loaded existing classifier weights from {model_path}")
+    else:
+        logger.info(f"No existing classifier weights found at {model_path}")
+
+    # Move to device
     model.to(device)
     
     # Unfreeze last transformer block and final LayerNorm
@@ -237,6 +247,33 @@ def main():
     logger.info(f"Validation Accuracy: {val_accuracy*100:.2f}%")
     logger.info(f"Test Accuracy: {test_accuracy*100:.2f}%")
 
+    # Classify Spam
+    logger.info("------- Classify Spam -------")
+    text = "Congratulations! You've won a $1000 Amazon gift card. Click the link to claim your prize."
+    classified_label = classify_spam(text, model, tokenizer, device, max_length=model.context_length)
+    logger.info(f"Text: {text}")
+    logger.info(f"Classified Label: {classified_label}")
+
+    text_2 = "Hey, just wanted to check if we're still on for dinner tonight? Let me know!"
+    classified_label2 = classify_spam(text_2, model, tokenizer, device, max_length=model.context_length)
+    logger.info(f"Text: {text_2 }")
+    logger.info(f"Classified Label: {classified_label2}")
+
+    text_3 = "Congratulations! Now that you've got your promotion, can I get $5"
+    classified_label3 = classify_spam(text_3, model, tokenizer, device, max_length=model.context_length)
+    logger.info(f"Text: {text_3}")
+    logger.info(f"Classified Label: {classified_label3}")
+
+    text_4 = "Hey John, You're invited to a private crypto group led by industry leaders. Sign up here to get access to the group for trading calls."
+    classified_label4 = classify_spam(text_4, model, tokenizer, device, max_length=model.context_length)
+    logger.info(f"Text: {text_4}")
+    logger.info(f"Classified Label: {classified_label4}")
+
+    # Save Model
+    model_path = MODELS_DIR / "spam_classifier.pth"
+    torch.save(model.state_dict(), model_path)
+    logger.info(f"Saved model to {model_path}")
+
     # End Test
     logger.info(50 * "=")
     logger.info("End Classification Test")
@@ -265,6 +302,42 @@ def plot_values(epochs_seen, examples_seen, train_values, val_values, label="los
 
     plt.savefig(charts_dir / f"classification_{label}.png", dpi=150)
     logger.info(f"Saved plot to {charts_dir / f'classification_{label}.png'}")
+
+def classify_spam(text, model, tokenizer, device, max_length=None, pad_token_id=50256):
+    model.eval()
+
+    # Prepare inputs to the model
+    input_ids = tokenizer.encode(text)
+    supported_context_length = model.emb.pos_emb.weight.shape[0]
+
+    # Truncate sequences if they are too long
+    input_ids = input_ids[:min(max_length, supported_context_length)]
+    assert max_length is not None, (
+        "max_length must be specified. If you want to use the full model context, "
+        "pass max_length=model.emb.pos_emb.weight.shape[0]."
+    )
+    assert max_length <= supported_context_length, (
+        f"max_length ({max_length}) exceeds model's supported context length ({supported_context_length})."
+    )
+    
+    # Store original length before padding
+    original_length = len(input_ids)
+    
+    # Pad sequences to the longest sequence
+    input_ids += [pad_token_id] * (max_length - len(input_ids))
+    input_tensor = torch.tensor(input_ids, device=device).unsqueeze(0) # add batch dimension
+
+    # Model inference
+    with torch.no_grad():
+        # Get logits for all tokens
+        all_logits = model(input_tensor)  # [batch_size, seq_len, num_classes]
+        # Use the last non-padding token (original_length - 1 because of 0-indexing)
+        logits = all_logits[:, original_length - 1, :]  # Logits of the last actual token
+    predicted_label = torch.argmax(logits, dim=-1).item()
+
+    # Return the classified result
+    return "spam" if predicted_label == 1 else "not spam"
+
 
 if __name__ == "__main__":
     main()
