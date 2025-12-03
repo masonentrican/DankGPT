@@ -100,6 +100,6 @@ def balance_two_class_dataset(
     
     # Combine with all minority class samples
     minority_subset = df[df[label_column] == minority_class]
-    balanced_df = pd.concat([minority_subset, majority_subset], ignore_index=True)
+    balanced_df = pd.concat([majority_subset, minority_subset])
     
     return balanced_df

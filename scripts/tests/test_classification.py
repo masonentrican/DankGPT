@@ -4,10 +4,11 @@ Test classification fine tuning on spam dataset.
 
 import sys
 import time
+from matplotlib import pyplot as plt
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
-from config.paths import DATA_DIR, MODELS_DIR, SCRIPTS_DIR
+from config.paths import DATA_DIR, MODELS_DIR, PROJECT_ROOT, SCRIPTS_DIR
 from config.models import GPT2_SMALL
 from config.training import QUICK
 from llm import GPTModel, get_device, get_tokenizer
@@ -150,21 +151,34 @@ def main():
 
     # Train Model
     logger.info("------- Train Model -------")
-    assert train_dataset.max_length < GPT2_SMALL['context_length'], (
-        f"Train dataset max length {train_dataset.max_length} is greater than GPT2_SMALL context length {GPT2_SMALL['context_length']}. "
+    # Use drop_rate=0.0 for classification (no dropout)
+    model_cfg = GPT2_SMALL.copy()
+    model_cfg["drop_rate"] = 0.0
+    
+    assert train_dataset.max_length < model_cfg['context_length'], (
+        f"Train dataset max length {train_dataset.max_length} is greater than model context length {model_cfg['context_length']}. "
         "Reinitialize the dataset with a smaller max length."
     )
 
     # Prepare the model for training
-    model = GPTModel(GPT2_SMALL)
+    model = GPTModel(model_cfg)
     load_openai_weights_into_gpt(model, params)
-    torch.manual_seed(123)
-    num_classes = 2
-    model.out_head = torch.nn.Linear(in_features=GPT2_SMALL['emb_dim'], out_features=num_classes)
-
-    # Freeze training of the whole model except the last transformer block and final LayerNorm module
+    
+    # Freeze all parameters first
     for param in model.parameters():
         param.requires_grad = False
+    
+    # Create output head AFTER freezing (new parameters are trainable by default)
+    torch.manual_seed(123)
+    num_classes = 2
+    model.out_head = torch.nn.Linear(in_features=model_cfg['emb_dim'], out_features=num_classes)
+    
+    # Move to device
+    device = get_device()
+    logger.info(f"Device: {device}")
+    model.to(device)
+    
+    # Unfreeze last transformer block and final LayerNorm
     for param in model.trf_blocks[-1].parameters():
         param.requires_grad = True
     for param in model.final_norm.parameters():
@@ -178,16 +192,12 @@ def main():
 
     logger.info(f"Inputs: {inputs}")
     logger.info(f"Inputs dimensions: {inputs.shape}")
-
-    device = get_device()
-
-    logger.info(f"Device: {device}")
-    model.to(device)
     torch.manual_seed(123)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=5e-5, weight_decay=0.01)
+    # optimizer will skip frozen params automatically
+    optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5, weight_decay=0.1)
 
-    #Override basic training configuration for classification on small dataset
+    # Override basic training configuration for classification on small dataset
     _train_cfg["num_epochs"] = 5
     _train_cfg["eval_freq"] = 50
     _train_cfg["eval_iter"] = 5
@@ -207,10 +217,54 @@ def main():
     end_time = time.time()
     logger.info(f"Training time: {(end_time - start_time) / 60} minutes")
 
+    # Plot losses
+    epochs_tensor = torch.linspace(0, _train_cfg["num_epochs"], len(train_losses))
+    examples_seen_tensor = torch.linspace(0, examples_seen, len(train_losses))
+
+    plot_values(epochs_tensor, examples_seen_tensor, train_losses, val_losses, label="loss")
+
+    # Plot accuracies
+    epochs_tensor = torch.linspace(0, _train_cfg["num_epochs"], len(train_accuracies))
+    examples_seen_tensor = torch.linspace(0, examples_seen, len(train_accuracies))
+    plot_values(epochs_tensor, examples_seen_tensor, train_accuracies, val_accuracies, label="accuracy")
+
+    # Compute full training validation test and accuracy
+    train_accuracy = calc_classification_accuracy_loader(train_loader, model, device)
+    val_accuracy = calc_classification_accuracy_loader(val_loader, model, device)
+    test_accuracy = calc_classification_accuracy_loader(test_loader, model, device)
+    
+    logger.info(f"Train Accuracy: {train_accuracy*100:.2f}%")
+    logger.info(f"Validation Accuracy: {val_accuracy*100:.2f}%")
+    logger.info(f"Test Accuracy: {test_accuracy*100:.2f}%")
+
     # End Test
     logger.info(50 * "=")
     logger.info("End Classification Test")
     logger.info(50 * "=" + "\n")
+
+def plot_values(epochs_seen, examples_seen, train_values, val_values, label="loss"):
+    fig, ax1 = plt.subplots(figsize=(5, 3))
+
+    # Plot training and validation Loss against epochs
+    ax1.plot(epochs_seen, train_values, label=f"Training {label}")
+    ax1.plot(epochs_seen, val_values, linestyle="-.", label=f"Validation {label}")
+    ax1.set_xlabel("Epochs")
+    ax1.set_ylabel(label.capitalize())
+    ax1.legend()
+
+    # Create a second x-axis for examples seen
+    ax2 = ax1.twiny()
+    ax2.plot(examples_seen, train_values, alpha=0)
+    ax2.set_xlabel("Examples Seen")
     
+    fig.tight_layout()
+
+    # Ensure charts directory exists (relative to project root)
+    charts_dir = PROJECT_ROOT / "charts"
+    charts_dir.mkdir(exist_ok=True)
+
+    plt.savefig(charts_dir / f"classification_{label}.png", dpi=150)
+    logger.info(f"Saved plot to {charts_dir / f'classification_{label}.png'}")
+
 if __name__ == "__main__":
     main()

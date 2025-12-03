@@ -301,7 +301,7 @@ def train_classification_model_simple(
                 f"Train Loss: {train_loss:.4f}, "
                 f"Val Loss: {val_loss:.4f}")
     
-        # Calculate accuracy after each epoch
+        # Calculate accuracy after each epoch (use eval_iter batches, not full dataset)
         train_accuracy = calc_classification_accuracy_loader(train_loader, model, device, num_batches=eval_iter)
         val_accuracy = calc_classification_accuracy_loader(val_loader, model, device, num_batches=eval_iter)
         logger.info(f"Train Accuracy: {train_accuracy*100:.2f}%")
